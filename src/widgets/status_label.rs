@@ -22,27 +22,27 @@ impl StatusLabel {
 }
 
 impl Widget<ApplicationState> for StatusLabel {
-    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut ApplicationState, env: &druid::Env) {
+    fn event(&mut self, _ctx: &mut druid::EventCtx, _event: &druid::Event, _data: &mut ApplicationState, _env: &druid::Env) {
     }
 
-    fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &ApplicationState, env: &druid::Env) {
+    fn lifecycle(&mut self, _ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &ApplicationState, _env: &druid::Env) {
         match event {
             druid::LifeCycle::WidgetAdded => self.update_label(data),
             _ => {}
         }
     }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &ApplicationState, data: &ApplicationState, env: &druid::Env) {
+    fn update(&mut self, ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, data: &ApplicationState, _env: &druid::Env) {
         self.update_label(data);
         ctx.request_paint();
     }
 
-    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &ApplicationState, env: &druid::Env) -> Size {
+    fn layout(&mut self, ctx: &mut druid::LayoutCtx, _bc: &druid::BoxConstraints, _data: &ApplicationState, env: &druid::Env) -> Size {
         self.text.rebuild_if_needed(ctx.text(), env);
         Size { width: 100.0, height: 20.0 }
     }
 
-    fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &ApplicationState, env: &druid::Env) {
+    fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
         self.text.rebuild_if_needed(ctx.text(), env);
 
         let size = ctx.size();

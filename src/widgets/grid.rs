@@ -23,7 +23,7 @@ impl CanvasGrid {
     }
 }
 impl Widget<ApplicationState> for CanvasGrid {
-    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut ApplicationState, env: &druid::Env) {
+    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut ApplicationState, _env: &druid::Env) {
         match event {
             Event::WindowConnected => {
                 // Have to request focus in order to get keyboard event
@@ -44,16 +44,16 @@ impl Widget<ApplicationState> for CanvasGrid {
         }
     }
 
-    fn lifecycle(&mut self, ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, data: &ApplicationState, env: &druid::Env) { }
+    fn lifecycle(&mut self, _ctx: &mut druid::LifeCycleCtx, _event: &druid::LifeCycle, _data: &ApplicationState, _env: &druid::Env) { }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &ApplicationState, data: &ApplicationState, env: &druid::Env) { }
+    fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, _data: &ApplicationState, _env: &druid::Env) { }
 
-    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &ApplicationState, env: &druid::Env) -> Size {
+    fn layout(&mut self, ctx: &mut druid::LayoutCtx, _bc: &druid::BoxConstraints, _data: &ApplicationState, env: &druid::Env) -> Size {
         self.letterbox.rebuild_if_needed(ctx.text(), env);
         Size { width: self.width, height: self.height }
     }
 
-    fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &ApplicationState, env: &druid::Env) {
+    fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, _env: &druid::Env) {
         if self.cell_size.is_none() {
             let lsize = self.letterbox.size();
             self.cell_size = Some((lsize.width, lsize.height));

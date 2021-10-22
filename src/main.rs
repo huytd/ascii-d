@@ -1,4 +1,4 @@
-use druid::{AppLauncher, PlatformError, Widget, WidgetExt, WindowDesc, widget::Scroll};
+use druid::{AppLauncher, PlatformError, Widget, WindowDesc, widget::Scroll};
 
 mod state;
 mod widgets;
