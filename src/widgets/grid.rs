@@ -1,6 +1,6 @@
 use std::usize;
 
-use druid::{Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout, Widget, kurbo::Line, widget::Label};
+use druid::{Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout, Widget, kurbo::Line, piet::{Text, TextLayoutBuilder}};
 
 use crate::state::{ApplicationState, OperationMode};
 
@@ -10,9 +10,9 @@ pub struct CanvasGrid {
     data: Vec<char>,
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
+    grid_text: TextLayout<String>,
     mouse_position: (usize, usize),
     is_mouse_down: bool,
-    grid_label: TextLayout<String>
 }
 impl CanvasGrid {
     pub fn new() -> Self {
@@ -20,31 +20,46 @@ impl CanvasGrid {
         let mut letterbox = TextLayout::<String>::new();
         letterbox.set_font(font.clone());
         letterbox.set_text("H".to_string());
-        let size = 500.0;
-        let mut grid_label = TextLayout::<String>::new();
-        grid_label.set_font(font.clone());
-        grid_label.set_text_color(Color::WHITE);
+        let size = 2000.0;
+        let mut grid_text = TextLayout::<String>::new();
+        grid_text.set_font(font.clone());
+        grid_text.set_text(" ".to_string());
         CanvasGrid {
             width: size,
             height: size,
-            data: vec![' '; size as usize * size as usize],
+            data: Vec::new(),
             cell_size: None,
             mouse_position: (0, 0),
             is_mouse_down: false,
             letterbox,
-            grid_label
+            grid_text
         }
     }
 
     fn set_char_at(&mut self, at: (usize, usize), c: char) {
-        let i = at.0 * self.width as usize + at.1;
-        self.data[i] = c;
-        self.update_grid_label();
+        if let Some((cell_width, _)) = self.cell_size {
+            let cols = (self.width / cell_width) as u64;
+            let i = at.0 * cols as usize + at.1;
+            self.data[i] = c;
+            println!("SET CHAR AT {:?}", at);
+        }
     }
 
-    fn update_grid_label(&mut self,) {
-        let text: String = self.data.chunks(self.width as usize).map(|s| s.to_vec()).collect::<Vec<_>>().join(&'\n').iter().collect();
-        self.grid_label.set_text(text);
+    fn init_grid(&mut self) {
+        if let Some((cell_width, cell_height)) = self.cell_size {
+            let rows = (self.height / cell_height) as u64;
+            let cols = (self.width / cell_width) as u64;
+            self.data = vec![' '; (rows * cols) as usize];
+            for row in 0..rows {
+                for col in 0..cols {
+                    let i = row * cols + col;
+                    if i >= cols && i % cols == 0 {
+                        self.data[i as usize] = '\n';
+                    }
+                }
+            }
+            println!("INIT GRID");
+        }
     }
 }
 impl Widget<ApplicationState> for CanvasGrid {
@@ -74,6 +89,7 @@ impl Widget<ApplicationState> for CanvasGrid {
 
                 if self.is_mouse_down {
                     self.set_char_at(self.mouse_position, '+');
+                    ctx.request_update();
                 }
 
                 ctx.request_paint();
@@ -90,17 +106,21 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn lifecycle(&mut self, _ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, _data: &ApplicationState, _env: &druid::Env) {
         match event {
-            druid::LifeCycle::WidgetAdded => self.update_grid_label(),
+            druid::LifeCycle::WidgetAdded => {},
             _ => {}
         }
     }
 
-    fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, _data: &ApplicationState, _env: &druid::Env) {
+    fn update(&mut self, ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, _data: &ApplicationState, env: &druid::Env) {
+        let content = self.data.clone().into_iter().collect::<String>();
+        self.grid_text.set_text(content);
+        self.grid_text.rebuild_if_needed(ctx.text(), env);
+        println!("REBUILD GRID TEXT LAYOUT");
     }
 
     fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &ApplicationState, env: &druid::Env) -> Size {
         self.letterbox.rebuild_if_needed(ctx.text(), env);
-        self.grid_label.rebuild_if_needed(ctx.text(), env);
+        self.grid_text.rebuild_if_needed(ctx.text(), env);
         Size { width: self.width, height: self.height }
     }
 
@@ -108,6 +128,7 @@ impl Widget<ApplicationState> for CanvasGrid {
         if self.cell_size.is_none() {
             let lsize = self.letterbox.size();
             self.cell_size = Some((lsize.width, lsize.height));
+            self.init_grid();
         }
 
         let size = ctx.size();
@@ -116,6 +137,7 @@ impl Widget<ApplicationState> for CanvasGrid {
 
         let cursor_brush = ctx.solid_brush(Color::YELLOW);
         let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
+
         if let Some((cell_width, cell_height)) = self.cell_size {
             let rows = (self.height / cell_height) as u64;
             let cols = (self.width / cell_width) as u64;
@@ -130,6 +152,8 @@ impl Widget<ApplicationState> for CanvasGrid {
                 ctx.stroke(line, &grid_brush, 1.0);
             }
 
+            println!("REDRAW");
+
             let mouse_row = self.mouse_position.0 as f64;
             let mouse_col = self.mouse_position.1 as f64;
             let cursor_rect = Rect::new(
@@ -137,8 +161,9 @@ impl Widget<ApplicationState> for CanvasGrid {
                 mouse_col * cell_width + cell_width, mouse_row * cell_height + cell_height);
             ctx.fill(cursor_rect, &cursor_brush);
 
-            self.grid_label.rebuild_if_needed(ctx.text(), env);
-            self.grid_label.draw(ctx, Point::ORIGIN);
+            if let Some(grid_layout) = self.grid_text.layout() {
+                ctx.draw_text(&grid_layout, Point::new(0.0, 0.0));
+            }
         }
     }
 }
