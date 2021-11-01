@@ -1,6 +1,6 @@
 use std::usize;
 
-use druid::{Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout, Widget, kurbo::Line, piet::{Text, TextLayoutBuilder}};
+use druid::{Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout, Widget, kurbo::Line, piet::{Text, TextLayoutBuilder}, theme::BACKGROUND_LIGHT};
 
 use crate::state::{ApplicationState, OperationMode};
 
@@ -20,10 +20,13 @@ impl CanvasGrid {
         let mut letterbox = TextLayout::<String>::new();
         letterbox.set_font(font.clone());
         letterbox.set_text("H".to_string());
-        let size = 2000.0;
+        let size = 5000.0;
+        // TODO: Rename grid_text to something meaningful. The purpose of this object
+        // is to hold the *reusable* text layout for an individual char. So, we would need some more
+        // grid_text object for each of the box drawing character.
         let mut grid_text = TextLayout::<String>::new();
         grid_text.set_font(font.clone());
-        grid_text.set_text(" ".to_string());
+        grid_text.set_text("+".to_string());
         CanvasGrid {
             width: size,
             height: size,
@@ -81,18 +84,15 @@ impl Widget<ApplicationState> for CanvasGrid {
                 ctx.request_update();
             },
             Event::MouseMove(event) => {
-                if let Some((cell_width, cell_height)) = self.cell_size {
-                    let mouse_row = (event.pos.y / cell_height) as usize;
-                    let mouse_col = (event.pos.x / cell_width) as usize;
-                    self.mouse_position = (mouse_row, mouse_col);
-                }
-
                 if self.is_mouse_down {
-                    self.set_char_at(self.mouse_position, '+');
-                    ctx.request_update();
+                    if let Some((cell_width, cell_height)) = self.cell_size {
+                        let mouse_row = (event.pos.y / cell_height) as usize;
+                        let mouse_col = (event.pos.x / cell_width) as usize;
+                        self.mouse_position = (mouse_row, mouse_col);
+                        self.set_char_at(self.mouse_position, '+');
+                        ctx.request_update();
+                    }
                 }
-
-                ctx.request_paint();
             },
             Event::MouseDown(_) => {
                 self.is_mouse_down = true;
@@ -111,59 +111,66 @@ impl Widget<ApplicationState> for CanvasGrid {
         }
     }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, _data: &ApplicationState, env: &druid::Env) {
-        let content = self.data.clone().into_iter().collect::<String>();
-        self.grid_text.set_text(content);
-        self.grid_text.rebuild_if_needed(ctx.text(), env);
-        println!("REBUILD GRID TEXT LAYOUT");
-    }
+    fn update(&mut self, ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, _data: &ApplicationState, env: &druid::Env) {}
 
     fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &ApplicationState, env: &druid::Env) -> Size {
-        self.letterbox.rebuild_if_needed(ctx.text(), env);
+        if self.cell_size.is_none() {
+            self.letterbox.rebuild_if_needed(ctx.text(), env);
+            let lsize = self.letterbox.size();
+            self.cell_size = Some((lsize.width, lsize.height));
+            self.init_grid();
+        }
         self.grid_text.rebuild_if_needed(ctx.text(), env);
         Size { width: self.width, height: self.height }
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
-        if self.cell_size.is_none() {
-            let lsize = self.letterbox.size();
-            self.cell_size = Some((lsize.width, lsize.height));
-            self.init_grid();
-        }
-
-        let size = ctx.size();
+        let bound = ctx.region().bounding_box();
         let brush = ctx.solid_brush(Color::BLACK);
-        ctx.fill(size.to_rect(), &brush);
+        ctx.with_save(|ctx| {
+            ctx.clip(bound);
+            ctx.fill(bound, &brush);
+            let cursor_brush = ctx.solid_brush(Color::YELLOW);
+            let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
 
-        let cursor_brush = ctx.solid_brush(Color::YELLOW);
-        let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
+            if let Some((cell_width, cell_height)) = self.cell_size {
+                let start = ((bound.x0 / cell_width) as usize, (bound.y0 / cell_height) as usize);
+                let end = ((bound.x1 / cell_width) as usize, (bound.y1 / cell_height) as usize);
+                let cols = (self.width / cell_width) as usize;
 
-        if let Some((cell_width, cell_height)) = self.cell_size {
-            let rows = (self.height / cell_height) as u64;
-            let cols = (self.width / cell_width) as u64;
-            for row in 0..rows {
-                let row = row as f64;
-                let line = Line::new(Point::new(0.0, row * cell_height), Point::new(size.width, row * cell_height));
-                ctx.stroke(line, &grid_brush, 1.0);
+                for row in (start.1)..(end.1) {
+                    let row = row as f64;
+                    let line = Line::new(Point::new(bound.x0, row * cell_height), Point::new(bound.x1, row * cell_height));
+                    ctx.stroke(line, &grid_brush, 1.0);
+                }
+                for col in (start.0)..(end.0) {
+                    let col = col as f64;
+                    let line = Line::new(Point::new(col * cell_width, bound.y0), Point::new(col * cell_width, bound.y1));
+                    ctx.stroke(line, &grid_brush, 1.0);
+                }
+
+                if self.is_mouse_down {
+                    let mouse_row = self.mouse_position.0 as f64;
+                    let mouse_col = self.mouse_position.1 as f64;
+                    let cursor_rect = Rect::new(
+                        mouse_col * cell_width, mouse_row * cell_height,
+                        mouse_col * cell_width + cell_width, mouse_row * cell_height + cell_height);
+                    ctx.fill(cursor_rect, &cursor_brush);
+                }
+
+                for row in (start.1)..(end.1) {
+                    for col in (start.0)..(end.0) {
+                        let i = row * cols + col;
+                        if !self.data[i].is_ascii_whitespace() {
+                            let point_rect = Rect::new(
+                                col as f64 * cell_width, row as f64 * cell_height,
+                                col as f64 * cell_width + cell_width, row as f64 * cell_height + cell_height);
+                            ctx.fill(point_rect, &grid_brush);
+                            self.grid_text.draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
+                        }
+                    }
+                }
             }
-            for col in 0..cols {
-                let col = col as f64;
-                let line = Line::new(Point::new(col * cell_width, 0.0), Point::new(col * cell_width, size.height));
-                ctx.stroke(line, &grid_brush, 1.0);
-            }
-
-            println!("REDRAW");
-
-            let mouse_row = self.mouse_position.0 as f64;
-            let mouse_col = self.mouse_position.1 as f64;
-            let cursor_rect = Rect::new(
-                mouse_col * cell_width, mouse_row * cell_height,
-                mouse_col * cell_width + cell_width, mouse_row * cell_height + cell_height);
-            ctx.fill(cursor_rect, &cursor_brush);
-
-            if let Some(grid_layout) = self.grid_text.layout() {
-                ctx.draw_text(&grid_layout, Point::new(0.0, 0.0));
-            }
-        }
+        });
     }
 }
