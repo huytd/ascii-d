@@ -2,8 +2,8 @@ use druid::MouseEvent;
 
 use crate::tools::line::LineTool;
 
-mod line;
 mod erase;
+mod line;
 
 pub trait ToolControl {
     fn start(&mut self, event: &MouseEvent, cell_size: (f64, f64), grid: (usize, usize));
@@ -14,7 +14,13 @@ pub trait ToolControl {
         cell_size: (f64, f64),
         grid: (usize, usize),
     );
-    fn end(&mut self, event: &MouseEvent, buffer: &mut Vec<char>, cell_size: (f64, f64), grid: (usize, usize));
+    fn end(
+        &mut self,
+        event: &MouseEvent,
+        buffer: &mut Vec<char>,
+        cell_size: (f64, f64),
+        grid: (usize, usize),
+    );
 }
 
 pub struct ToolManager {

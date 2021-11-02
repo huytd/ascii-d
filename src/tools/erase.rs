@@ -7,11 +7,23 @@ impl ToolControl for EraseTool {
         todo!()
     }
 
-    fn draw( &mut self, event: &druid::MouseEvent, buffer: &mut Vec<char>, cell_size: (f64, f64), grid: (usize, usize),) {
+    fn draw(
+        &mut self,
+        event: &druid::MouseEvent,
+        buffer: &mut Vec<char>,
+        cell_size: (f64, f64),
+        grid: (usize, usize),
+    ) {
         todo!()
     }
 
-    fn end(&mut self, event: &druid::MouseEvent, buffer: &mut Vec<char>, cell_size: (f64, f64), grid: (usize, usize)) {
+    fn end(
+        &mut self,
+        event: &druid::MouseEvent,
+        buffer: &mut Vec<char>,
+        cell_size: (f64, f64),
+        grid: (usize, usize),
+    ) {
         todo!()
     }
 }

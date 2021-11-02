@@ -1,14 +1,12 @@
 use super::ToolControl;
 
 pub struct LineTool {
-    from: Option<(usize, usize)>
+    from: Option<(usize, usize)>,
 }
 
 impl LineTool {
     pub fn new() -> Self {
-        Self {
-            from: None
-        }
+        Self { from: None }
     }
 }
 
@@ -36,16 +34,32 @@ impl ToolControl for LineTool {
             let d_col = (mouse_col as isize - from_col as isize).abs();
             if d_row > d_col {
                 // Draw vertical line
-                let from = if from_row > mouse_row { mouse_row } else { from_row };
-                let to = if from_row > mouse_row { from_row } else { mouse_row };
+                let from = if from_row > mouse_row {
+                    mouse_row
+                } else {
+                    from_row
+                };
+                let to = if from_row > mouse_row {
+                    from_row
+                } else {
+                    mouse_row
+                };
                 for row in from..to {
                     let i = row * cols + from_col;
                     buffer[i] = '*';
                 }
             } else {
                 // Draw horizontal line
-                let from = if from_col > mouse_col { mouse_col } else { from_col };
-                let to = if from_col > mouse_col { from_col } else { mouse_col };
+                let from = if from_col > mouse_col {
+                    mouse_col
+                } else {
+                    from_col
+                };
+                let to = if from_col > mouse_col {
+                    from_col
+                } else {
+                    mouse_col
+                };
                 for col in from..to {
                     let i = from_row * cols + col;
                     buffer[i] = '*';

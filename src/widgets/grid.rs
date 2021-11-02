@@ -1,9 +1,8 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line,
-    Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout,
-    Widget,
+    kurbo::Line, Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size,
+    TextLayout, Widget,
 };
 
 use crate::{
@@ -114,11 +113,8 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some((cell_width, cell_height)) = self.cell_size {
                     let rows = (self.height / cell_height) as usize;
                     let cols = (self.width / cell_width) as usize;
-                    self.tool_manager.start(
-                        event,
-                        (cell_width, cell_height),
-                        (rows, cols),
-                    );
+                    self.tool_manager
+                        .start(event, (cell_width, cell_height), (rows, cols));
                 }
             }
             Event::MouseUp(event) => {
