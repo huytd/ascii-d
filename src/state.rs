@@ -8,7 +8,7 @@ pub enum OperationMode {
     Draw,
     Erase,
     Text,
-    Visual
+    Visual,
 }
 
 impl Display for OperationMode {
@@ -26,5 +26,5 @@ impl Display for OperationMode {
 
 #[derive(Clone, PartialEq, Data)]
 pub struct ApplicationState {
-    pub mode: OperationMode
+    pub mode: OperationMode,
 }

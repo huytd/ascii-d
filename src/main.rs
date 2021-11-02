@@ -1,6 +1,7 @@
-use druid::{AppLauncher, PlatformError, Widget, WindowDesc, widget::Scroll};
+use druid::{widget::Scroll, AppLauncher, PlatformError, Widget, WindowDesc};
 
 mod state;
+mod tools;
 mod widgets;
 use state::{ApplicationState, OperationMode};
 use widgets::{grid::CanvasGrid, layout::StackLayout, status_label::StatusLabel};
@@ -15,10 +16,9 @@ fn build_ui() -> impl Widget<ApplicationState> {
 fn main() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
-    let app =
-    AppLauncher::with_window(
-        WindowDesc::new(build_ui())
-    );
-    app.launch(ApplicationState { mode: OperationMode::Normal })?;
+    let app = AppLauncher::with_window(WindowDesc::new(build_ui()));
+    app.launch(ApplicationState {
+        mode: OperationMode::Normal,
+    })?;
     Ok(())
 }

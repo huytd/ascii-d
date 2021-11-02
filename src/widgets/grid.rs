@@ -1,8 +1,15 @@
 use std::usize;
 
-use druid::{Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout, Widget, kurbo::Line, piet::{Text, TextLayoutBuilder}, theme::BACKGROUND_LIGHT};
+use druid::{
+    kurbo::Line,
+    Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout,
+    Widget,
+};
 
-use crate::state::{ApplicationState, OperationMode};
+use crate::{
+    state::{ApplicationState, OperationMode},
+    tools::{ToolControl, ToolManager},
+};
 
 pub struct CanvasGrid {
     width: f64,
@@ -13,6 +20,7 @@ pub struct CanvasGrid {
     grid_text: TextLayout<String>,
     mouse_position: (usize, usize),
     is_mouse_down: bool,
+    tool_manager: ToolManager,
 }
 impl CanvasGrid {
     pub fn new() -> Self {
@@ -34,17 +42,9 @@ impl CanvasGrid {
             cell_size: None,
             mouse_position: (0, 0),
             is_mouse_down: false,
+            tool_manager: ToolManager::new(),
             letterbox,
-            grid_text
-        }
-    }
-
-    fn set_char_at(&mut self, at: (usize, usize), c: char) {
-        if let Some((cell_width, _)) = self.cell_size {
-            let cols = (self.width / cell_width) as u64;
-            let i = at.0 * cols as usize + at.1;
-            self.data[i] = c;
-            println!("SET CHAR AT {:?}", at);
+            grid_text,
         }
     }
 
@@ -66,12 +66,18 @@ impl CanvasGrid {
     }
 }
 impl Widget<ApplicationState> for CanvasGrid {
-    fn event(&mut self, ctx: &mut druid::EventCtx, event: &druid::Event, data: &mut ApplicationState, _env: &druid::Env) {
+    fn event(
+        &mut self,
+        ctx: &mut druid::EventCtx,
+        event: &druid::Event,
+        data: &mut ApplicationState,
+        _env: &druid::Env,
+    ) {
         match event {
             Event::WindowConnected => {
                 // Have to request focus in order to get keyboard event
                 ctx.request_focus();
-            },
+            }
             Event::KeyDown(event) => {
                 match event.code {
                     Code::Digit1 => data.mode = OperationMode::Draw,
@@ -82,38 +88,85 @@ impl Widget<ApplicationState> for CanvasGrid {
                     _ => {}
                 }
                 ctx.request_update();
-            },
+            }
             Event::MouseMove(event) => {
                 if self.is_mouse_down {
                     if let Some((cell_width, cell_height)) = self.cell_size {
+                        let rows = (self.height / cell_height) as usize;
+                        let cols = (self.width / cell_width) as usize;
                         let mouse_row = (event.pos.y / cell_height) as usize;
                         let mouse_col = (event.pos.x / cell_width) as usize;
                         self.mouse_position = (mouse_row, mouse_col);
-                        self.set_char_at(self.mouse_position, '+');
+
+                        self.tool_manager.draw(
+                            event,
+                            &mut self.data,
+                            (cell_width, cell_height),
+                            (rows, cols),
+                        );
+
                         ctx.request_update();
                     }
                 }
-            },
-            Event::MouseDown(_) => {
+            }
+            Event::MouseDown(event) => {
                 self.is_mouse_down = true;
-            },
-            Event::MouseUp(_) => {
+                if let Some((cell_width, cell_height)) = self.cell_size {
+                    let rows = (self.height / cell_height) as usize;
+                    let cols = (self.width / cell_width) as usize;
+                    self.tool_manager.start(
+                        event,
+                        (cell_width, cell_height),
+                        (rows, cols),
+                    );
+                }
+            }
+            Event::MouseUp(event) => {
                 self.is_mouse_down = false;
-            },
+                if let Some((cell_width, cell_height)) = self.cell_size {
+                    let rows = (self.height / cell_height) as usize;
+                    let cols = (self.width / cell_width) as usize;
+                    self.tool_manager.end(
+                        event,
+                        &mut self.data,
+                        (cell_width, cell_height),
+                        (rows, cols),
+                    );
+                }
+            }
             _ => {}
         }
     }
 
-    fn lifecycle(&mut self, _ctx: &mut druid::LifeCycleCtx, event: &druid::LifeCycle, _data: &ApplicationState, _env: &druid::Env) {
+    fn lifecycle(
+        &mut self,
+        _ctx: &mut druid::LifeCycleCtx,
+        event: &druid::LifeCycle,
+        _data: &ApplicationState,
+        _env: &druid::Env,
+    ) {
         match event {
-            druid::LifeCycle::WidgetAdded => {},
+            druid::LifeCycle::WidgetAdded => {}
             _ => {}
         }
     }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, _old_data: &ApplicationState, _data: &ApplicationState, env: &druid::Env) {}
+    fn update(
+        &mut self,
+        ctx: &mut druid::UpdateCtx,
+        _old_data: &ApplicationState,
+        _data: &ApplicationState,
+        env: &druid::Env,
+    ) {
+    }
 
-    fn layout(&mut self, ctx: &mut druid::LayoutCtx, bc: &druid::BoxConstraints, data: &ApplicationState, env: &druid::Env) -> Size {
+    fn layout(
+        &mut self,
+        ctx: &mut druid::LayoutCtx,
+        bc: &druid::BoxConstraints,
+        data: &ApplicationState,
+        env: &druid::Env,
+    ) -> Size {
         if self.cell_size.is_none() {
             self.letterbox.rebuild_if_needed(ctx.text(), env);
             let lsize = self.letterbox.size();
@@ -121,7 +174,10 @@ impl Widget<ApplicationState> for CanvasGrid {
             self.init_grid();
         }
         self.grid_text.rebuild_if_needed(ctx.text(), env);
-        Size { width: self.width, height: self.height }
+        Size {
+            width: self.width,
+            height: self.height,
+        }
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
@@ -134,18 +190,30 @@ impl Widget<ApplicationState> for CanvasGrid {
             let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
 
             if let Some((cell_width, cell_height)) = self.cell_size {
-                let start = ((bound.x0 / cell_width) as usize, (bound.y0 / cell_height) as usize);
-                let end = ((bound.x1 / cell_width) as usize, (bound.y1 / cell_height) as usize);
+                let start = (
+                    (bound.x0 / cell_width) as usize,
+                    (bound.y0 / cell_height) as usize,
+                );
+                let end = (
+                    (bound.x1 / cell_width) as usize,
+                    (bound.y1 / cell_height) as usize,
+                );
                 let cols = (self.width / cell_width) as usize;
 
                 for row in (start.1)..(end.1) {
                     let row = row as f64;
-                    let line = Line::new(Point::new(bound.x0, row * cell_height), Point::new(bound.x1, row * cell_height));
+                    let line = Line::new(
+                        Point::new(bound.x0, row * cell_height),
+                        Point::new(bound.x1, row * cell_height),
+                    );
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
                 for col in (start.0)..(end.0) {
                     let col = col as f64;
-                    let line = Line::new(Point::new(col * cell_width, bound.y0), Point::new(col * cell_width, bound.y1));
+                    let line = Line::new(
+                        Point::new(col * cell_width, bound.y0),
+                        Point::new(col * cell_width, bound.y1),
+                    );
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
 
@@ -153,8 +221,11 @@ impl Widget<ApplicationState> for CanvasGrid {
                     let mouse_row = self.mouse_position.0 as f64;
                     let mouse_col = self.mouse_position.1 as f64;
                     let cursor_rect = Rect::new(
-                        mouse_col * cell_width, mouse_row * cell_height,
-                        mouse_col * cell_width + cell_width, mouse_row * cell_height + cell_height);
+                        mouse_col * cell_width,
+                        mouse_row * cell_height,
+                        mouse_col * cell_width + cell_width,
+                        mouse_row * cell_height + cell_height,
+                    );
                     ctx.fill(cursor_rect, &cursor_brush);
                 }
 
@@ -162,11 +233,8 @@ impl Widget<ApplicationState> for CanvasGrid {
                     for col in (start.0)..(end.0) {
                         let i = row * cols + col;
                         if !self.data[i].is_ascii_whitespace() {
-                            let point_rect = Rect::new(
-                                col as f64 * cell_width, row as f64 * cell_height,
-                                col as f64 * cell_width + cell_width, row as f64 * cell_height + cell_height);
-                            ctx.fill(point_rect, &grid_brush);
-                            self.grid_text.draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
+                            self.grid_text
+                                .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }
                     }
                 }
