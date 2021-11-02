@@ -3,6 +3,7 @@ use druid::MouseEvent;
 use crate::tools::line::LineTool;
 
 mod line;
+mod erase;
 
 pub trait ToolControl {
     fn start(&mut self, event: &MouseEvent, cell_size: (f64, f64), grid: (usize, usize));
