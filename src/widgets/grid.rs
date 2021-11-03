@@ -6,8 +6,8 @@ use druid::{
 };
 
 use crate::{
-    state::{ApplicationState, OperationMode},
-    tools::{ToolControl, ToolManager},
+    state::ApplicationState,
+    tools::{DrawingTools, ToolControl, ToolManager},
 };
 
 pub struct CanvasGrid {
@@ -75,17 +75,16 @@ impl Widget<ApplicationState> for CanvasGrid {
         match event {
             Event::WindowConnected => {
                 // Have to request focus in order to get keyboard event
+                data.mode = self.tool_manager.get_active_tool().to_string();
                 ctx.request_focus();
             }
             Event::KeyDown(event) => {
                 match event.code {
-                    Code::Digit1 => data.mode = OperationMode::Draw,
-                    Code::Digit2 => data.mode = OperationMode::Text,
-                    Code::Digit3 => data.mode = OperationMode::Erase,
-                    Code::Digit4 => data.mode = OperationMode::Visual,
-                    Code::Escape => data.mode = OperationMode::Normal,
+                    Code::Digit1 => self.tool_manager.set_tool(DrawingTools::Line),
+                    Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Eraser),
                     _ => {}
                 }
+                data.mode = self.tool_manager.get_active_tool().to_string();
                 ctx.request_update();
             }
             Event::MouseMove(event) => {

@@ -1,9 +1,45 @@
+use std::{
+    fmt::Display,
+    ops::{Index, IndexMut},
+    slice::SliceIndex,
+};
+
 use druid::MouseEvent;
 
-use crate::tools::line::LineTool;
+use crate::tools::{erase::EraseTool, line::LineTool};
 
 mod erase;
 mod line;
+
+#[derive(Clone, Copy, PartialEq)]
+pub enum DrawingTools {
+    Line = 0,
+    Eraser = 1,
+}
+
+impl Display for DrawingTools {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let op = match self {
+            DrawingTools::Line => "LINE",
+            DrawingTools::Eraser => "ERASER",
+        };
+        write!(f, "{}", op)
+    }
+}
+
+impl<T> Index<DrawingTools> for Vec<T> {
+    type Output = T;
+
+    fn index(&self, index: DrawingTools) -> &Self::Output {
+        &self[index as usize]
+    }
+}
+
+impl<T> IndexMut<DrawingTools> for Vec<T> {
+    fn index_mut(&mut self, index: DrawingTools) -> &mut T {
+        &mut self[index as usize]
+    }
+}
 
 pub trait ToolControl {
     fn start(&mut self, event: &MouseEvent, cell_size: (f64, f64), grid: (usize, usize));
@@ -25,27 +61,29 @@ pub trait ToolControl {
 
 pub struct ToolManager {
     available_tools: Vec<Box<dyn ToolControl>>,
-    current: usize,
+    current: DrawingTools,
 }
 
 impl ToolManager {
     pub fn new() -> Self {
         Self {
-            available_tools: vec![Box::new(LineTool::new())],
-            current: 0,
+            available_tools: vec![Box::new(LineTool::new()), Box::new(EraseTool::new())],
+            current: DrawingTools::Line,
         }
     }
 
-    pub fn set_tool(&mut self, index: usize) {
-        self.current = index;
+    pub fn set_tool(&mut self, tool: DrawingTools) {
+        self.current = tool;
+    }
+
+    pub fn get_active_tool(&self) -> DrawingTools {
+        return self.current;
     }
 }
 
 impl ToolControl for ToolManager {
     fn start(&mut self, event: &MouseEvent, cell_size: (f64, f64), grid: (usize, usize)) {
-        if let Some(tool) = self.available_tools.get_mut(self.current) {
-            tool.start(event, cell_size, grid);
-        }
+        self.available_tools[self.current].start(event, cell_size, grid);
     }
 
     fn draw(
@@ -55,9 +93,7 @@ impl ToolControl for ToolManager {
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
-        if let Some(tool) = self.available_tools.get_mut(self.current) {
-            tool.draw(event, buffer, cell_size, grid);
-        }
+        self.available_tools[self.current].draw(event, buffer, cell_size, grid);
     }
 
     fn end(
@@ -67,8 +103,6 @@ impl ToolControl for ToolManager {
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
-        if let Some(tool) = self.available_tools.get_mut(self.current) {
-            tool.draw(event, buffer, cell_size, grid);
-        }
+        self.available_tools[self.current].end(event, buffer, cell_size, grid);
     }
 }

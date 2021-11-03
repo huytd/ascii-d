@@ -3,7 +3,7 @@ use druid::{widget::Scroll, AppLauncher, PlatformError, Widget, WindowDesc};
 mod state;
 mod tools;
 mod widgets;
-use state::{ApplicationState, OperationMode};
+use state::ApplicationState;
 use widgets::{grid::CanvasGrid, layout::StackLayout, status_label::StatusLabel};
 
 fn build_ui() -> impl Widget<ApplicationState> {
@@ -18,7 +18,7 @@ fn main() -> Result<(), PlatformError> {
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(WindowDesc::new(build_ui()));
     app.launch(ApplicationState {
-        mode: OperationMode::Normal,
+        mode: String::new(),
     })?;
     Ok(())
 }
