@@ -85,23 +85,22 @@ impl Widget<ApplicationState> for CanvasGrid {
                 ctx.request_update();
             }
             Event::MouseMove(event) => {
-                if self.is_mouse_down {
-                    if let Some((cell_width, cell_height)) = self.cell_size {
-                        let rows = (self.height / cell_height) as usize;
-                        let cols = (self.width / cell_width) as usize;
-                        let mouse_row = (event.pos.y / cell_height) as usize;
-                        let mouse_col = (event.pos.x / cell_width) as usize;
-                        self.mouse_position = (mouse_row, mouse_col);
+                if let Some((cell_width, cell_height)) = self.cell_size {
+                    let rows = (self.height / cell_height) as usize;
+                    let cols = (self.width / cell_width) as usize;
+                    let mouse_row = (event.pos.y / cell_height) as usize;
+                    let mouse_col = (event.pos.x / cell_width) as usize;
+                    self.mouse_position = (mouse_row, mouse_col);
 
+                    if self.is_mouse_down {
                         self.tool_manager.draw(
                             event,
                             &mut self.data,
                             (cell_width, cell_height),
                             (rows, cols),
                         );
-
-                        ctx.request_update();
                     }
+                    ctx.request_update();
                 }
             }
             Event::MouseDown(event) => {
@@ -181,6 +180,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
             let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
+            let cursor_brush = ctx.solid_brush(Color::YELLOW);
 
             if let Some((cell_width, cell_height)) = self.cell_size {
                 let start = (
@@ -209,6 +209,16 @@ impl Widget<ApplicationState> for CanvasGrid {
                     );
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
+
+                let mouse_row = self.mouse_position.0 as f64;
+                let mouse_col = self.mouse_position.1 as f64;
+                let cursor_rect = Rect::new(
+                    mouse_col * cell_width,
+                    mouse_row * cell_height,
+                    mouse_col * cell_width + cell_width,
+                    mouse_row * cell_height + cell_height,
+                );
+                ctx.fill(cursor_rect, &cursor_brush);
 
                 for row in (start.1)..(end.1) {
                     for col in (start.0)..(end.0) {

@@ -36,6 +36,10 @@ impl GridCell {
         self.content
     }
 
+    pub fn read_content(&self) -> char {
+        self.content
+    }
+
     pub fn clear(&mut self) {
         self.content = CHAR_SPACE;
         self.preview = None;
