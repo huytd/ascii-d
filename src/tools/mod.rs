@@ -1,12 +1,14 @@
 use std::{
     fmt::Display,
     ops::{Index, IndexMut},
-    slice::SliceIndex,
 };
 
 use druid::MouseEvent;
 
-use crate::tools::{erase::EraseTool, line::LineTool};
+use crate::{
+    data::GridCell,
+    tools::{erase::EraseTool, line::LineTool},
+};
 
 mod erase;
 mod line;
@@ -46,14 +48,14 @@ pub trait ToolControl {
     fn draw(
         &mut self,
         event: &MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     );
     fn end(
         &mut self,
         event: &MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     );
@@ -89,7 +91,7 @@ impl ToolControl for ToolManager {
     fn draw(
         &mut self,
         event: &MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
@@ -99,7 +101,7 @@ impl ToolControl for ToolManager {
     fn end(
         &mut self,
         event: &MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {

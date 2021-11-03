@@ -1,9 +1,11 @@
 use druid::{widget::Scroll, AppLauncher, PlatformError, Widget, WindowDesc};
 
-mod state;
+mod consts;
+mod data;
 mod tools;
 mod widgets;
-use state::ApplicationState;
+
+use data::ApplicationState;
 use widgets::{grid::CanvasGrid, layout::StackLayout, status_label::StatusLabel};
 
 fn build_ui() -> impl Widget<ApplicationState> {

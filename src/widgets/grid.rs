@@ -6,14 +6,15 @@ use druid::{
 };
 
 use crate::{
-    state::ApplicationState,
+    consts::CANVAS_SIZE,
+    data::{ApplicationState, GridCell},
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
 pub struct CanvasGrid {
     width: f64,
     height: f64,
-    data: Vec<char>,
+    data: Vec<GridCell>,
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
     grid_text: TextLayout<String>,
@@ -27,16 +28,12 @@ impl CanvasGrid {
         let mut letterbox = TextLayout::<String>::new();
         letterbox.set_font(font.clone());
         letterbox.set_text("H".to_string());
-        let size = 5000.0;
-        // TODO: Rename grid_text to something meaningful. The purpose of this object
-        // is to hold the *reusable* text layout for an individual char. So, we would need some more
-        // grid_text object for each of the box drawing character.
         let mut grid_text = TextLayout::<String>::new();
         grid_text.set_font(font.clone());
         grid_text.set_text("+".to_string());
         CanvasGrid {
-            width: size,
-            height: size,
+            width: CANVAS_SIZE,
+            height: CANVAS_SIZE,
             data: Vec::new(),
             cell_size: None,
             mouse_position: (0, 0),
@@ -51,12 +48,12 @@ impl CanvasGrid {
         if let Some((cell_width, cell_height)) = self.cell_size {
             let rows = (self.height / cell_height) as u64;
             let cols = (self.width / cell_width) as u64;
-            self.data = vec![' '; (rows * cols) as usize];
+            self.data = vec![GridCell::empty(); (rows * cols) as usize];
             for row in 0..rows {
                 for col in 0..cols {
                     let i = row * cols + col;
                     if i >= cols && i % cols == 0 {
-                        self.data[i as usize] = '\n';
+                        self.data[i as usize] = GridCell::newline();
                     }
                 }
             }
@@ -127,6 +124,8 @@ impl Widget<ApplicationState> for CanvasGrid {
                         (cell_width, cell_height),
                         (rows, cols),
                     );
+
+                    ctx.request_update();
                 }
             }
             _ => {}
@@ -148,18 +147,18 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn update(
         &mut self,
-        ctx: &mut druid::UpdateCtx,
+        _ctx: &mut druid::UpdateCtx,
         _old_data: &ApplicationState,
         _data: &ApplicationState,
-        env: &druid::Env,
+        _env: &druid::Env,
     ) {
     }
 
     fn layout(
         &mut self,
         ctx: &mut druid::LayoutCtx,
-        bc: &druid::BoxConstraints,
-        data: &ApplicationState,
+        _bc: &druid::BoxConstraints,
+        _data: &ApplicationState,
         env: &druid::Env,
     ) -> Size {
         if self.cell_size.is_none() {
@@ -181,7 +180,6 @@ impl Widget<ApplicationState> for CanvasGrid {
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let cursor_brush = ctx.solid_brush(Color::YELLOW);
             let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
 
             if let Some((cell_width, cell_height)) = self.cell_size {
@@ -212,22 +210,18 @@ impl Widget<ApplicationState> for CanvasGrid {
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
 
-                if self.is_mouse_down {
-                    let mouse_row = self.mouse_position.0 as f64;
-                    let mouse_col = self.mouse_position.1 as f64;
-                    let cursor_rect = Rect::new(
-                        mouse_col * cell_width,
-                        mouse_row * cell_height,
-                        mouse_col * cell_width + cell_width,
-                        mouse_row * cell_height + cell_height,
-                    );
-                    ctx.fill(cursor_rect, &cursor_brush);
-                }
-
                 for row in (start.1)..(end.1) {
                     for col in (start.0)..(end.0) {
                         let i = row * cols + col;
-                        if !self.data[i].is_ascii_whitespace() {
+                        let cell_content = self.data[i].read();
+                        if !cell_content.is_ascii_whitespace() {
+                            self.grid_text.set_text(cell_content.to_string());
+                            if self.data[i].preview.is_some() {
+                                self.grid_text.set_text_color(Color::RED);
+                            } else {
+                                self.grid_text.set_text_color(Color::WHITE);
+                            }
+                            self.grid_text.rebuild_if_needed(ctx.text(), env);
                             self.grid_text
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }

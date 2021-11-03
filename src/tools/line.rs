@@ -1,3 +1,8 @@
+use crate::{
+    consts::{CHAR_HOR_L, CHAR_VER_L},
+    data::GridCell,
+};
+
 use super::ToolControl;
 
 pub struct LineTool {
@@ -21,7 +26,7 @@ impl ToolControl for LineTool {
     fn draw(
         &mut self,
         event: &druid::MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
@@ -32,6 +37,13 @@ impl ToolControl for LineTool {
         if let Some((from_row, from_col)) = self.from {
             let d_row = (mouse_row as isize - from_row as isize).abs();
             let d_col = (mouse_col as isize - from_col as isize).abs();
+
+            for cell in buffer.iter_mut() {
+                if cell.preview.is_some() {
+                    cell.discard();
+                }
+            }
+
             if d_row > d_col {
                 // Draw vertical line
                 let from = if from_row > mouse_row {
@@ -46,7 +58,7 @@ impl ToolControl for LineTool {
                 };
                 for row in from..to {
                     let i = row * cols + from_col;
-                    buffer[i] = '*';
+                    buffer[i].set_preview(CHAR_VER_L);
                 }
             } else {
                 // Draw horizontal line
@@ -62,7 +74,7 @@ impl ToolControl for LineTool {
                 };
                 for col in from..to {
                     let i = from_row * cols + col;
-                    buffer[i] = '*';
+                    buffer[i].set_preview(CHAR_HOR_L);
                 }
             }
         }
@@ -71,10 +83,15 @@ impl ToolControl for LineTool {
     fn end(
         &mut self,
         event: &druid::MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
         self.from = None;
+        for cell in buffer {
+            if cell.preview.is_some() {
+                cell.commit();
+            }
+        }
     }
 }

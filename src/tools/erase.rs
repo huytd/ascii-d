@@ -1,3 +1,5 @@
+use crate::data::GridCell;
+
 use super::ToolControl;
 
 pub struct EraseTool;
@@ -14,7 +16,7 @@ impl ToolControl for EraseTool {
     fn draw(
         &mut self,
         event: &druid::MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
@@ -23,13 +25,13 @@ impl ToolControl for EraseTool {
         let mouse_row = (event.pos.y / cell_height) as usize;
         let mouse_col = (event.pos.x / cell_width) as usize;
         let i = mouse_row * cols + mouse_col;
-        buffer[i] = ' ';
+        buffer[i].clear();
     }
 
     fn end(
         &mut self,
         event: &druid::MouseEvent,
-        buffer: &mut Vec<char>,
+        buffer: &mut Vec<GridCell>,
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {

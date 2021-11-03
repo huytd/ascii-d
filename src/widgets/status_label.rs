@@ -2,7 +2,7 @@ use druid::{
     Color, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
-use crate::state::ApplicationState;
+use crate::data::ApplicationState;
 
 pub struct StatusLabel {
     text: TextLayout<String>,
