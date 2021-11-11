@@ -8,6 +8,7 @@ use druid::{
 use crate::{
     consts::CANVAS_SIZE,
     data::{ApplicationState, GridCell},
+    shapes::ShapeList,
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
@@ -15,6 +16,7 @@ pub struct CanvasGrid {
     width: f64,
     height: f64,
     data: Vec<GridCell>,
+    shape_list: ShapeList,
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
     grid_text: TextLayout<String>,
@@ -35,6 +37,7 @@ impl CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
             data: Vec::new(),
+            shape_list: Vec::new(),
             cell_size: None,
             mouse_position: (0, 0),
             is_mouse_down: false,
@@ -78,7 +81,6 @@ impl Widget<ApplicationState> for CanvasGrid {
             Event::KeyDown(event) => {
                 match event.code {
                     Code::Digit1 => self.tool_manager.set_tool(DrawingTools::Line),
-                    Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Eraser),
                     _ => {}
                 }
                 data.mode = self.tool_manager.get_active_tool().to_string();
@@ -95,7 +97,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                     if self.is_mouse_down {
                         self.tool_manager.draw(
                             event,
-                            &mut self.data,
+                            &mut self.shape_list,
                             (cell_width, cell_height),
                             (rows, cols),
                         );
@@ -108,22 +110,31 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some((cell_width, cell_height)) = self.cell_size {
                     let rows = (self.height / cell_height) as usize;
                     let cols = (self.width / cell_width) as usize;
-                    self.tool_manager
-                        .start(event, (cell_width, cell_height), (rows, cols));
+                    self.tool_manager.start(
+                        event,
+                        &mut self.shape_list,
+                        (cell_width, cell_height),
+                        (rows, cols),
+                    );
                 }
             }
             Event::MouseUp(event) => {
                 self.is_mouse_down = false;
+
                 if let Some((cell_width, cell_height)) = self.cell_size {
                     let rows = (self.height / cell_height) as usize;
                     let cols = (self.width / cell_width) as usize;
                     self.tool_manager.end(
                         event,
-                        &mut self.data,
+                        &mut self.shape_list,
                         (cell_width, cell_height),
                         (rows, cols),
                     );
-
+                    for cell in self.shape_list.iter_mut() {
+                        if cell.is_preview() {
+                            cell.commit(&mut self.data);
+                        }
+                    }
                     ctx.request_update();
                 }
             }
@@ -146,7 +157,7 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn update(
         &mut self,
-        _ctx: &mut druid::UpdateCtx,
+        ctx: &mut druid::UpdateCtx,
         _old_data: &ApplicationState,
         _data: &ApplicationState,
         _env: &druid::Env,
@@ -175,11 +186,11 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
         let bound = ctx.region().bounding_box();
-        let brush = ctx.solid_brush(Color::BLACK);
+        let brush = ctx.solid_brush(Color::rgb(0.08, 0.08, 0.08));
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let grid_brush = ctx.solid_brush(Color::WHITE.with_alpha(0.1));
+            let grid_brush = ctx.solid_brush(Color::BLACK);
             let cursor_brush = ctx.solid_brush(Color::YELLOW);
 
             if let Some((cell_width, cell_height)) = self.cell_size {
@@ -192,6 +203,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                     (bound.y1 / cell_height) as usize,
                 );
                 let cols = (self.width / cell_width) as usize;
+                let rows = (self.height / cell_height) as usize;
 
                 for row in (start.1)..(end.1) {
                     let row = row as f64;
@@ -219,6 +231,12 @@ impl Widget<ApplicationState> for CanvasGrid {
                     mouse_row * cell_height + cell_height,
                 );
                 ctx.fill(cursor_rect, &cursor_brush);
+
+                if let Some(shape) = self.shape_list.last_mut() {
+                    if shape.is_preview() {
+                        shape.draw(&mut self.data, (cell_width, cell_height), (rows, cols));
+                    }
+                }
 
                 for row in (start.1)..(end.1) {
                     for col in (start.0)..(end.0) {
