@@ -81,6 +81,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             Event::KeyDown(event) => {
                 match event.code {
                     Code::Digit1 => self.tool_manager.set_tool(DrawingTools::Line),
+                    Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Text),
                     _ => {}
                 }
                 data.mode = self.tool_manager.get_active_tool().to_string();

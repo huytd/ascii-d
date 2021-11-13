@@ -72,4 +72,13 @@ impl ToolControl for LineTool {
         grid: (usize, usize),
     ) {
     }
+
+    fn input(
+        &mut self,
+        event: &druid::KeyEvent,
+        shape_list: &mut ShapeList,
+        cell_size: (f64, f64),
+        grid: (usize, usize),
+    ) {
+    }
 }

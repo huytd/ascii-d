@@ -1,3 +1,5 @@
+use druid::{keyboard_types, KbKey};
+
 use crate::shapes::text::TextShape;
 
 use super::ToolControl;
@@ -31,7 +33,6 @@ impl ToolControl for TextTool {
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
-        todo!()
     }
 
     fn end(
@@ -41,7 +42,6 @@ impl ToolControl for TextTool {
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
-        todo!()
     }
 
     fn input(
@@ -51,7 +51,11 @@ impl ToolControl for TextTool {
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
-        // Todo: Implement text input with the help of druid_shell::text
-        // https://github.com/linebender/druid/blob/ac3e0a6601fabeefa56c1ca7f6e4f4096febf4b5/druid-shell/src/text.rs
+        match event.clone().key {
+            KbKey::Character(c) => {
+                println!("PRESSED {}", c);
+            }
+            _ => {}
+        }
     }
 }

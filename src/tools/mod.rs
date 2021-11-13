@@ -6,7 +6,10 @@ use std::{
 
 use druid::{keyboard_types::KeyboardEvent, Event, KeyEvent, MouseEvent};
 
-use crate::{shapes::ShapeList, tools::line::LineTool};
+use crate::{
+    shapes::ShapeList,
+    tools::{line::LineTool, text::TextTool},
+};
 
 pub mod line;
 pub mod text;
@@ -14,12 +17,14 @@ pub mod text;
 #[derive(Clone, Copy, PartialEq)]
 pub enum DrawingTools {
     Line = 0,
+    Text = 1,
 }
 
 impl Display for DrawingTools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let op = match self {
             DrawingTools::Line => "LINE",
+            DrawingTools::Text => "TEXT",
         };
         write!(f, "{}", op)
     }
@@ -78,7 +83,7 @@ pub struct ToolManager {
 impl ToolManager {
     pub fn new() -> Self {
         Self {
-            available_tools: vec![Box::new(LineTool::new())],
+            available_tools: vec![Box::new(LineTool::new()), Box::new(TextTool::new())],
             current: DrawingTools::Line,
         }
     }
