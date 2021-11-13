@@ -12,7 +12,7 @@ use crate::{
 
 use super::ToolControl;
 
-pub struct LineTool {}
+pub struct LineTool;
 
 impl LineTool {
     pub fn new() -> Self {

@@ -1,13 +1,15 @@
 use std::{
+    cell,
     fmt::Display,
     ops::{Index, IndexMut},
 };
 
-use druid::MouseEvent;
+use druid::{keyboard_types::KeyboardEvent, Event, KeyEvent, MouseEvent};
 
 use crate::{shapes::ShapeList, tools::line::LineTool};
 
-mod line;
+pub mod line;
+pub mod text;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum DrawingTools {
@@ -48,6 +50,13 @@ pub trait ToolControl {
     fn draw(
         &mut self,
         event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        cell_size: (f64, f64),
+        grid: (usize, usize),
+    );
+    fn input(
+        &mut self,
+        event: &KeyEvent,
         shape_list: &mut ShapeList,
         cell_size: (f64, f64),
         grid: (usize, usize),
@@ -112,5 +121,15 @@ impl ToolControl for ToolManager {
         grid: (usize, usize),
     ) {
         self.available_tools[self.current].end(event, shape_list, cell_size, grid);
+    }
+
+    fn input(
+        &mut self,
+        event: &KeyEvent,
+        shape_list: &mut ShapeList,
+        cell_size: (f64, f64),
+        grid: (usize, usize),
+    ) {
+        self.available_tools[self.current].input(event, shape_list, cell_size, grid);
     }
 }

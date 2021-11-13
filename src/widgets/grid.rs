@@ -37,7 +37,7 @@ impl CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
             data: Vec::new(),
-            shape_list: Vec::new(),
+            shape_list: vec![],
             cell_size: None,
             mouse_position: (0, 0),
             is_mouse_down: false,
@@ -84,6 +84,16 @@ impl Widget<ApplicationState> for CanvasGrid {
                     _ => {}
                 }
                 data.mode = self.tool_manager.get_active_tool().to_string();
+                if let Some((cell_width, cell_height)) = self.cell_size {
+                    let rows = (self.height / cell_height) as usize;
+                    let cols = (self.width / cell_width) as usize;
+                    self.tool_manager.input(
+                        event,
+                        &mut self.shape_list,
+                        (cell_width, cell_height),
+                        (rows, cols),
+                    );
+                }
                 ctx.request_update();
             }
             Event::MouseMove(event) => {
@@ -130,9 +140,9 @@ impl Widget<ApplicationState> for CanvasGrid {
                         (cell_width, cell_height),
                         (rows, cols),
                     );
-                    for cell in self.shape_list.iter_mut() {
-                        if cell.is_preview() {
-                            cell.commit(&mut self.data);
+                    for shape in self.shape_list.iter_mut() {
+                        if shape.is_preview() && !shape.is_manual_commit() {
+                            shape.commit(&mut self.data);
                         }
                     }
                     ctx.request_update();
