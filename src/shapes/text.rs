@@ -18,19 +18,16 @@ impl ShapeRender for TextShape {
         grid: (usize, usize),
     ) {
         let (rows, cols) = grid;
-        let (mut row, mut col) = self.position;
+        let (row, col) = self.position;
 
-        for (index, c) in self.content.chars().enumerate() {
-            let i = row * cols + col;
-            if c != CHAR_NEWLINE {
+        for index in 0..self.max_len {
+            let i = row * cols + col + index;
+            if let Some(c) = self.content.chars().nth(index) {
                 grid_buffer.get(i).set_content(c);
-                col += 1;
             } else {
-                row += 1;
-                col = self.position.1;
+                grid_buffer.get(i).set_content(' ');
             }
-
-            if self.is_preview() && index == self.content.len() - 1 {
+            if index + 1 == self.content.len() {
                 grid_buffer.highlight(i);
             }
         }

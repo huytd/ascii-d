@@ -80,10 +80,17 @@ impl Widget<ApplicationState> for CanvasGrid {
                 ctx.request_focus();
             }
             Event::KeyDown(event) => {
-                match event.code {
-                    Code::Digit1 => self.tool_manager.set_tool(DrawingTools::Line),
-                    Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Text),
-                    _ => {}
+                if self.tool_manager.get_active_tool() != DrawingTools::Text {
+                    match event.code {
+                        Code::Digit1 => self.tool_manager.set_tool(DrawingTools::Line),
+                        Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Text),
+                        _ => {}
+                    }
+                } else {
+                    match event.code {
+                        Code::Escape => self.tool_manager.set_tool(DrawingTools::Line),
+                        _ => {}
+                    }
                 }
                 data.mode = self.tool_manager.get_active_tool().to_string();
                 if let Some((cell_width, cell_height)) = self.cell_size {
