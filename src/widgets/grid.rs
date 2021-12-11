@@ -210,7 +210,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
             let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
-            let cursor_brush = ctx.solid_brush(Color::YELLOW);
+            let cursor_brush = ctx.solid_brush(Color::RED);
 
             if let Some((cell_width, cell_height)) = self.cell_size {
                 let start = (

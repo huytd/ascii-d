@@ -20,16 +20,21 @@ impl ShapeRender for TextShape {
         let (rows, cols) = grid;
         let (row, col) = self.position;
 
-        for index in 0..self.max_len {
+        for index in 0..=self.max_len {
             let i = row * cols + col + index;
             if let Some(c) = self.content.chars().nth(index) {
                 grid_buffer.get(i).set_content(c);
             } else {
                 grid_buffer.get(i).set_content(' ');
             }
-            if index + 1 == self.content.len() {
+            if self.content.len() > 0 && self.content.len() == index {
                 grid_buffer.highlight(i);
             }
+        }
+
+        if self.content.len() == 0 {
+            let first_cell = row * cols + col;
+            grid_buffer.highlight(first_cell);
         }
     }
 
