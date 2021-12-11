@@ -1,6 +1,6 @@
 use druid::{keyboard_types, KbKey};
 
-use crate::shapes::text::TextShape;
+use crate::shapes::{text::TextShape, ShapeRender};
 
 use super::ToolControl;
 
@@ -51,11 +51,18 @@ impl ToolControl for TextTool {
         cell_size: (f64, f64),
         grid: (usize, usize),
     ) {
-        match event.clone().key {
-            KbKey::Character(c) => {
-                println!("PRESSED {}", c);
+        if let Some(text) = shape_list.last_mut() {
+            if let Some(mut text) = text.as_any_mut().downcast_mut::<TextShape>() {
+                match event.clone().key {
+                    KbKey::Character(c) => {
+                        text.push_char(c.chars().next().unwrap());
+                    }
+                    KbKey::Backspace => {
+                        text.pop_char();
+                    }
+                    _ => {}
+                }
             }
-            _ => {}
         }
     }
 }

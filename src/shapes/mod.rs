@@ -1,18 +1,13 @@
 use std::{any::Any, fmt::Debug};
 
-use crate::data::GridCell;
+use crate::data::{GridCell, GridList};
 
 pub mod line;
 pub mod text;
 
 pub trait ShapeRender {
-    fn draw(
-        &mut self,
-        grid_buffer: &mut Vec<GridCell>,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    );
-    fn commit(&mut self, grid_buffer: &mut Vec<GridCell>);
+    fn draw(&mut self, grid_buffer: &mut GridList, cell_size: (f64, f64), grid: (usize, usize));
+    fn commit(&mut self, grid_buffer: &mut GridList);
     fn is_preview(&self) -> bool;
     fn is_manual_commit(&self) -> bool;
     fn as_any(&self) -> &dyn Any;

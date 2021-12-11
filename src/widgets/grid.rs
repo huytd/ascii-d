@@ -7,7 +7,7 @@ use druid::{
 
 use crate::{
     consts::CANVAS_SIZE,
-    data::{ApplicationState, GridCell},
+    data::{ApplicationState, GridCell, GridList},
     shapes::ShapeList,
     tools::{DrawingTools, ToolControl, ToolManager},
 };
@@ -15,7 +15,7 @@ use crate::{
 pub struct CanvasGrid {
     width: f64,
     height: f64,
-    data: Vec<GridCell>,
+    data: GridList,
     shape_list: ShapeList,
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
@@ -36,7 +36,7 @@ impl CanvasGrid {
         CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
-            data: Vec::new(),
+            data: GridList::new(0),
             shape_list: vec![],
             cell_size: None,
             mouse_position: (0, 0),
@@ -51,12 +51,13 @@ impl CanvasGrid {
         if let Some((cell_width, cell_height)) = self.cell_size {
             let rows = (self.height / cell_height) as u64;
             let cols = (self.width / cell_width) as u64;
-            self.data = vec![GridCell::empty(); (rows * cols) as usize];
+            self.data = GridList::new((rows * cols) as usize);
             for row in 0..rows {
                 for col in 0..cols {
                     let i = row * cols + col;
                     if i >= cols && i % cols == 0 {
-                        self.data[i as usize] = GridCell::newline();
+                        let cell = self.data.get(i as usize);
+                        *cell = GridCell::newline();
                     }
                 }
             }
@@ -197,11 +198,11 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
         let bound = ctx.region().bounding_box();
-        let brush = ctx.solid_brush(Color::rgb(0.08, 0.08, 0.08));
+        let brush = ctx.solid_brush(Color::WHITE);
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let grid_brush = ctx.solid_brush(Color::BLACK);
+            let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
             let cursor_brush = ctx.solid_brush(Color::YELLOW);
 
             if let Some((cell_width, cell_height)) = self.cell_size {
@@ -233,15 +234,15 @@ impl Widget<ApplicationState> for CanvasGrid {
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
 
-                let mouse_row = self.mouse_position.0 as f64;
-                let mouse_col = self.mouse_position.1 as f64;
-                let cursor_rect = Rect::new(
-                    mouse_col * cell_width,
-                    mouse_row * cell_height,
-                    mouse_col * cell_width + cell_width,
-                    mouse_row * cell_height + cell_height,
-                );
-                ctx.fill(cursor_rect, &cursor_brush);
+                // let mouse_row = self.mouse_position.0 as f64;
+                // let mouse_col = self.mouse_position.1 as f64;
+                // let cursor_rect = Rect::new(
+                //     mouse_col * cell_width,
+                //     mouse_row * cell_height,
+                //     mouse_col * cell_width + cell_width,
+                //     mouse_row * cell_height + cell_height,
+                // )
+                // ctx.fill(cursor_rect, &cursor_brush);
 
                 if let Some(shape) = self.shape_list.last_mut() {
                     if shape.is_preview() {
@@ -252,13 +253,26 @@ impl Widget<ApplicationState> for CanvasGrid {
                 for row in (start.1)..(end.1) {
                     for col in (start.0)..(end.0) {
                         let i = row * cols + col;
-                        let cell_content = self.data[i].read();
+
+                        if self.data.get(i).highlighted {
+                            let h_row = row as f64;
+                            let h_col = col as f64;
+                            let h_rect = Rect::new(
+                                h_col * cell_width,
+                                h_row * cell_height,
+                                h_col * cell_width + cell_width,
+                                h_row * cell_height + cell_height,
+                            );
+                            ctx.stroke(h_rect, &cursor_brush, 1.0);
+                        }
+
+                        let cell_content = self.data.get(i).read();
                         if !cell_content.is_ascii_whitespace() {
                             self.grid_text.set_text(cell_content.to_string());
-                            if self.data[i].preview.is_some() {
+                            if self.data.get(i).preview.is_some() {
                                 self.grid_text.set_text_color(Color::RED);
                             } else {
-                                self.grid_text.set_text_color(Color::WHITE);
+                                self.grid_text.set_text_color(Color::BLACK);
                             }
                             self.grid_text.rebuild_if_needed(ctx.text(), env);
                             self.grid_text

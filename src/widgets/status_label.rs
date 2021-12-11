@@ -20,7 +20,7 @@ impl StatusLabel {
         self.text
             .set_font(FontDescriptor::new(FontFamily::MONOSPACE).with_size(16.0));
         self.text.set_text(text);
-        self.text.set_text_color(Color::BLACK);
+        self.text.set_text_color(Color::WHITE);
     }
 }
 
@@ -77,7 +77,7 @@ impl Widget<ApplicationState> for StatusLabel {
 
         let size = ctx.size();
         let text_size = self.text.layout_metrics();
-        let brush = ctx.solid_brush(Color::WHITE);
+        let brush = ctx.solid_brush(Color::BLACK);
         let rect = Rect::new(
             20.0,
             size.height - 50.0,
