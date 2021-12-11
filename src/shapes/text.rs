@@ -1,5 +1,3 @@
-use crate::consts::CHAR_NEWLINE;
-
 use super::{Shape, ShapeRender};
 
 #[derive(Debug)]
@@ -11,13 +9,8 @@ pub struct TextShape {
 }
 
 impl ShapeRender for TextShape {
-    fn draw(
-        &mut self,
-        grid_buffer: &mut crate::data::GridList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    ) {
-        let (rows, cols) = grid;
+    fn draw(&mut self, grid_buffer: &mut crate::data::GridList) {
+        let (rows, cols) = grid_buffer.grid_size;
         let (row, col) = self.position;
 
         for index in 0..=self.max_len {
@@ -27,12 +20,12 @@ impl ShapeRender for TextShape {
             } else {
                 grid_buffer.get(i).set_content(' ');
             }
-            if self.content.len() > 0 && self.content.len() == index {
+            if self.preview && self.content.len() > 0 && self.content.len() == index {
                 grid_buffer.highlight(i);
             }
         }
 
-        if self.content.len() == 0 {
+        if self.preview && self.content.len() == 0 {
             let first_cell = row * cols + col;
             grid_buffer.highlight(first_cell);
         }

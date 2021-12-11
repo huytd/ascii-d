@@ -20,13 +20,8 @@ pub struct LineShape {
 }
 
 impl ShapeRender for LineShape {
-    fn draw(
-        &mut self,
-        grid_buffer: &mut crate::data::GridList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    ) {
-        let (rows, cols) = grid;
+    fn draw(&mut self, grid_buffer: &mut crate::data::GridList) {
+        let (rows, cols) = grid_buffer.grid_size;
         let (from_row, from_col) = self.start;
         let (to_row, to_col) = self.end;
 

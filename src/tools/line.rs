@@ -1,9 +1,5 @@
 use crate::{
-    consts::{
-        CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_DOWN_L,
-        CHAR_HOR_L, CHAR_HOR_UP_L, CHAR_SPACE, CHAR_VER_L, CHAR_VER_LEFT_L, CHAR_VER_RIGHT_L,
-    },
-    data::GridCell,
+    data::GridList,
     shapes::{
         line::{LineDirection, LineShape},
         ShapeList, ShapeRender,
@@ -25,26 +21,24 @@ impl ToolControl for LineTool {
         &mut self,
         event: &druid::MouseEvent,
         shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
+        grid_list: &mut GridList,
     ) {
-        let (cell_width, cell_height) = cell_size;
+        let (cell_width, cell_height) = grid_list.cell_size;
         let mouse_row = (event.pos.y / cell_height) as usize;
         let mouse_col = (event.pos.x / cell_width) as usize;
-        shape_list.push(Box::new(LineShape::new(mouse_row, mouse_col)));
+        shape_list.add_shape(Box::new(LineShape::new(mouse_row, mouse_col)));
     }
 
     fn draw(
         &mut self,
         event: &druid::MouseEvent,
         shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
+        grid_list: &mut GridList,
     ) {
-        if let Some(line) = shape_list.last_mut() {
+        if let Some(line) = shape_list.data.last_mut() {
             if let Some(mut line) = line.as_any_mut().downcast_mut::<LineShape>() {
                 // TODO: Boundary check for row / col access
-                let (cell_width, cell_height) = cell_size;
+                let (cell_width, cell_height) = grid_list.cell_size;
                 let mouse_row = (event.pos.y / cell_height) as usize;
                 let mouse_col = (event.pos.x / cell_width) as usize;
                 let (from_row, from_col) = line.start;
@@ -68,8 +62,7 @@ impl ToolControl for LineTool {
         &mut self,
         event: &druid::MouseEvent,
         shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
+        grid_list: &mut GridList,
     ) {
     }
 
@@ -77,8 +70,7 @@ impl ToolControl for LineTool {
         &mut self,
         event: &druid::KeyEvent,
         shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
+        grid_list: &mut GridList,
     ) {
     }
 }

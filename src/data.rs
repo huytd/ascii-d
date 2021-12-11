@@ -77,12 +77,24 @@ impl GridCell {
 
 pub struct GridList {
     data: Vec<GridCell>,
+    pub cell_size: (f64, f64),
+    pub grid_size: (usize, usize),
 }
 
 impl GridList {
-    pub fn new(cap: usize) -> Self {
+    pub fn default() -> Self {
         GridList {
-            data: vec![GridCell::empty(); cap],
+            data: vec![],
+            cell_size: (0.0, 0.0),
+            grid_size: (0, 0),
+        }
+    }
+
+    pub fn new(cell_width: f64, cell_height: f64, rows: usize, cols: usize) -> Self {
+        GridList {
+            data: vec![GridCell::empty(); rows * cols],
+            cell_size: (cell_width, cell_height),
+            grid_size: (rows, cols),
         }
     }
 

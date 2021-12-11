@@ -15,7 +15,7 @@ use crate::{
 pub struct CanvasGrid {
     width: f64,
     height: f64,
-    data: GridList,
+    grid_list: GridList,
     shape_list: ShapeList,
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
@@ -36,8 +36,8 @@ impl CanvasGrid {
         CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
-            data: GridList::new(0),
-            shape_list: vec![],
+            grid_list: GridList::default(),
+            shape_list: ShapeList::new(),
             cell_size: None,
             mouse_position: (0, 0),
             is_mouse_down: false,
@@ -49,14 +49,14 @@ impl CanvasGrid {
 
     fn init_grid(&mut self) {
         if let Some((cell_width, cell_height)) = self.cell_size {
-            let rows = (self.height / cell_height) as u64;
-            let cols = (self.width / cell_width) as u64;
-            self.data = GridList::new((rows * cols) as usize);
+            let rows = (self.height / cell_height) as usize;
+            let cols = (self.width / cell_width) as usize;
+            self.grid_list = GridList::new(cell_width, cell_height, rows, cols);
             for row in 0..rows {
                 for col in 0..cols {
                     let i = row * cols + col;
                     if i >= cols && i % cols == 0 {
-                        let cell = self.data.get(i as usize);
+                        let cell = self.grid_list.get(i as usize);
                         *cell = GridCell::newline();
                     }
                 }
@@ -82,44 +82,40 @@ impl Widget<ApplicationState> for CanvasGrid {
             Event::KeyDown(event) => {
                 if self.tool_manager.get_active_tool() != DrawingTools::Text {
                     match event.code {
-                        Code::Digit1 => self.tool_manager.set_tool(DrawingTools::Line),
+                        Code::Digit1 => {
+                            self.tool_manager.set_tool(DrawingTools::Line);
+                            self.shape_list.commit_all(&mut self.grid_list);
+                            self.grid_list.clear_highlight_all();
+                        }
                         Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Text),
                         _ => {}
                     }
                 } else {
                     match event.code {
-                        Code::Escape => self.tool_manager.set_tool(DrawingTools::Line),
+                        Code::Escape => {
+                            self.tool_manager.set_tool(DrawingTools::Line);
+                            self.shape_list.commit_all(&mut self.grid_list);
+                            self.grid_list.clear_highlight_all();
+                        }
                         _ => {}
                     }
                 }
                 data.mode = self.tool_manager.get_active_tool().to_string();
                 if let Some((cell_width, cell_height)) = self.cell_size {
-                    let rows = (self.height / cell_height) as usize;
-                    let cols = (self.width / cell_width) as usize;
-                    self.tool_manager.input(
-                        event,
-                        &mut self.shape_list,
-                        (cell_width, cell_height),
-                        (rows, cols),
-                    );
+                    self.tool_manager
+                        .input(event, &mut self.shape_list, &mut self.grid_list);
                 }
                 ctx.request_update();
             }
             Event::MouseMove(event) => {
                 if let Some((cell_width, cell_height)) = self.cell_size {
-                    let rows = (self.height / cell_height) as usize;
-                    let cols = (self.width / cell_width) as usize;
                     let mouse_row = (event.pos.y / cell_height) as usize;
                     let mouse_col = (event.pos.x / cell_width) as usize;
                     self.mouse_position = (mouse_row, mouse_col);
 
                     if self.is_mouse_down {
-                        self.tool_manager.draw(
-                            event,
-                            &mut self.shape_list,
-                            (cell_width, cell_height),
-                            (rows, cols),
-                        );
+                        self.tool_manager
+                            .draw(event, &mut self.shape_list, &mut self.grid_list);
                     }
                     ctx.request_update();
                 }
@@ -127,33 +123,17 @@ impl Widget<ApplicationState> for CanvasGrid {
             Event::MouseDown(event) => {
                 self.is_mouse_down = true;
                 if let Some((cell_width, cell_height)) = self.cell_size {
-                    let rows = (self.height / cell_height) as usize;
-                    let cols = (self.width / cell_width) as usize;
-                    self.tool_manager.start(
-                        event,
-                        &mut self.shape_list,
-                        (cell_width, cell_height),
-                        (rows, cols),
-                    );
+                    self.tool_manager
+                        .start(event, &mut self.shape_list, &mut self.grid_list);
                 }
             }
             Event::MouseUp(event) => {
                 self.is_mouse_down = false;
 
                 if let Some((cell_width, cell_height)) = self.cell_size {
-                    let rows = (self.height / cell_height) as usize;
-                    let cols = (self.width / cell_width) as usize;
-                    self.tool_manager.end(
-                        event,
-                        &mut self.shape_list,
-                        (cell_width, cell_height),
-                        (rows, cols),
-                    );
-                    for shape in self.shape_list.iter_mut() {
-                        if shape.is_preview() && !shape.is_manual_commit() {
-                            shape.commit(&mut self.data);
-                        }
-                    }
+                    self.tool_manager
+                        .end(event, &mut self.shape_list, &mut self.grid_list);
+                    self.shape_list.commit(&mut self.grid_list);
                     ctx.request_update();
                 }
             }
@@ -241,27 +221,13 @@ impl Widget<ApplicationState> for CanvasGrid {
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
 
-                // let mouse_row = self.mouse_position.0 as f64;
-                // let mouse_col = self.mouse_position.1 as f64;
-                // let cursor_rect = Rect::new(
-                //     mouse_col * cell_width,
-                //     mouse_row * cell_height,
-                //     mouse_col * cell_width + cell_width,
-                //     mouse_row * cell_height + cell_height,
-                // )
-                // ctx.fill(cursor_rect, &cursor_brush);
-
-                if let Some(shape) = self.shape_list.last_mut() {
-                    if shape.is_preview() {
-                        shape.draw(&mut self.data, (cell_width, cell_height), (rows, cols));
-                    }
-                }
+                self.shape_list.draw(&mut self.grid_list);
 
                 for row in (start.1)..(end.1) {
                     for col in (start.0)..(end.0) {
                         let i = row * cols + col;
 
-                        if self.data.get(i).highlighted {
+                        if self.grid_list.get(i).highlighted {
                             let h_row = row as f64;
                             let h_col = col as f64;
                             let h_rect = Rect::new(
@@ -273,10 +239,10 @@ impl Widget<ApplicationState> for CanvasGrid {
                             ctx.stroke(h_rect, &cursor_brush, 1.0);
                         }
 
-                        let cell_content = self.data.get(i).read();
+                        let cell_content = self.grid_list.get(i).read();
                         if !cell_content.is_ascii_whitespace() {
                             self.grid_text.set_text(cell_content.to_string());
-                            if self.data.get(i).preview.is_some() {
+                            if self.grid_list.get(i).preview.is_some() {
                                 self.grid_text.set_text_color(Color::RED);
                             } else {
                                 self.grid_text.set_text_color(Color::BLACK);
