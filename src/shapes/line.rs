@@ -20,21 +20,12 @@ pub struct LineShape {
 }
 
 impl ShapeRender for LineShape {
-    fn draw(
-        &mut self,
-        grid_buffer: &mut Vec<crate::data::GridCell>,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    ) {
-        let (rows, cols) = grid;
+    fn draw(&mut self, grid_buffer: &mut crate::data::GridList) {
+        let (rows, cols) = grid_buffer.grid_size;
         let (from_row, from_col) = self.start;
         let (to_row, to_col) = self.end;
 
-        for cell in grid_buffer.iter_mut() {
-            if cell.preview.is_some() {
-                cell.discard();
-            }
-        }
+        grid_buffer.discard_all();
 
         let start_i = from_row * cols + from_col;
 
@@ -45,38 +36,38 @@ impl ShapeRender for LineShape {
 
                 for row in from..=to {
                     let i = row * cols + from_col;
-                    grid_buffer[i].set_preview(CHAR_VER_L);
+                    grid_buffer.get(i).set_preview(CHAR_VER_L);
                 }
 
-                if grid_buffer[start_i].read_content() == CHAR_HOR_L {
+                if grid_buffer.get(start_i).read_content() == CHAR_HOR_L {
                     let prev_i = from_row * cols + (from_col - 1);
                     let next_i = from_row * cols + (from_col + 1);
-                    if grid_buffer[prev_i].read() == CHAR_SPACE {
+                    if grid_buffer.get(prev_i).read() == CHAR_SPACE {
                         if from_row < to_row {
                             // Draw down, put top-left corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_TL_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TL_L);
                         }
                         if from_row > to_row {
                             // Draw up, put bottom-left corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_BL_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BL_L);
                         }
-                    } else if grid_buffer[next_i].read() == CHAR_SPACE {
+                    } else if grid_buffer.get(next_i).read() == CHAR_SPACE {
                         if from_row < to_row {
                             // Draw down, put top-right corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_TR_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TR_L);
                         }
                         if from_row > to_row {
                             // Draw up, put bottom-right corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_BR_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BR_L);
                         }
                     } else {
                         if from_row < to_row {
                             // Draw down, put hor-down
-                            grid_buffer[start_i].set_preview(CHAR_HOR_DOWN_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_HOR_DOWN_L);
                         }
                         if from_row > to_row {
                             // Draw up, put hor-up
-                            grid_buffer[start_i].set_preview(CHAR_HOR_UP_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_HOR_UP_L);
                         }
                     }
                 }
@@ -86,38 +77,38 @@ impl ShapeRender for LineShape {
                 let to = if from_col > to_col { from_col } else { to_col };
                 for col in from..=to {
                     let i = from_row * cols + col;
-                    grid_buffer[i].set_preview(CHAR_HOR_L);
+                    grid_buffer.get(i).set_preview(CHAR_HOR_L);
                 }
 
-                if grid_buffer[start_i].read_content() == CHAR_VER_L {
+                if grid_buffer.get(start_i).read_content() == CHAR_VER_L {
                     let prev_i = (from_row - 1) * cols + from_col;
                     let next_i = (from_row + 1) * cols + from_col;
-                    if grid_buffer[prev_i].read() == CHAR_SPACE {
+                    if grid_buffer.get(prev_i).read() == CHAR_SPACE {
                         if from_col < to_col {
                             // Draw right, put top-left corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_TL_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TL_L);
                         }
                         if from_col > to_col {
                             // Draw left, put top-right corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_TR_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TR_L);
                         }
-                    } else if grid_buffer[next_i].read() == CHAR_SPACE {
+                    } else if grid_buffer.get(next_i).read() == CHAR_SPACE {
                         if from_col < to_col {
                             // Draw right, put bottom-left corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_BL_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BL_L);
                         }
                         if from_col > to_col {
                             // Draw left, put bottom-right corner
-                            grid_buffer[start_i].set_preview(CHAR_CORNER_BR_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BR_L);
                         }
                     } else {
                         if from_col < to_col {
                             // Draw right, put ver-right
-                            grid_buffer[start_i].set_preview(CHAR_VER_RIGHT_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_VER_RIGHT_L);
                         }
                         if from_col > to_col {
                             // Draw left, put ver-left
-                            grid_buffer[start_i].set_preview(CHAR_VER_LEFT_L);
+                            grid_buffer.get(start_i).set_preview(CHAR_VER_LEFT_L);
                         }
                     }
                 }
@@ -125,12 +116,8 @@ impl ShapeRender for LineShape {
         }
     }
 
-    fn commit(&mut self, grid_buffer: &mut Vec<crate::data::GridCell>) {
-        for cell in grid_buffer.iter_mut() {
-            if cell.preview.is_some() {
-                cell.commit();
-            }
-        }
+    fn commit(&mut self, grid_buffer: &mut crate::data::GridList) {
+        grid_buffer.commit_all();
         self.preview = false;
     }
 
@@ -144,6 +131,10 @@ impl ShapeRender for LineShape {
 
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
+    }
+
+    fn is_manual_commit(&self) -> bool {
+        false
     }
 }
 

@@ -11,6 +11,7 @@ pub struct ApplicationState {
 pub struct GridCell {
     pub content: char,
     pub preview: Option<char>,
+    pub highlighted: bool,
 }
 
 impl GridCell {
@@ -18,6 +19,7 @@ impl GridCell {
         Self {
             content,
             preview: None,
+            highlighted: false,
         }
     }
 
@@ -62,5 +64,70 @@ impl GridCell {
 
     pub fn discard(&mut self) {
         self.preview = None;
+    }
+
+    pub fn highlight(&mut self) {
+        self.highlighted = true;
+    }
+
+    pub fn clear_highlight(&mut self) {
+        self.highlighted = false;
+    }
+}
+
+pub struct GridList {
+    data: Vec<GridCell>,
+    pub cell_size: (f64, f64),
+    pub grid_size: (usize, usize),
+}
+
+impl GridList {
+    pub fn default() -> Self {
+        GridList {
+            data: vec![],
+            cell_size: (0.0, 0.0),
+            grid_size: (0, 0),
+        }
+    }
+
+    pub fn new(cell_width: f64, cell_height: f64, rows: usize, cols: usize) -> Self {
+        GridList {
+            data: vec![GridCell::empty(); rows * cols],
+            cell_size: (cell_width, cell_height),
+            grid_size: (rows, cols),
+        }
+    }
+
+    pub fn get(&mut self, index: usize) -> &mut GridCell {
+        &mut self.data[index]
+    }
+
+    pub fn highlight(&mut self, index: usize) {
+        self.clear_highlight_all();
+        self.data[index].highlight();
+    }
+
+    pub fn clear_highlight_all(&mut self) {
+        for cell in self.data.iter_mut() {
+            if cell.highlighted {
+                cell.clear_highlight();
+            }
+        }
+    }
+
+    pub fn commit_all(&mut self) {
+        for cell in self.data.iter_mut() {
+            if cell.preview.is_some() {
+                cell.commit();
+            }
+        }
+    }
+
+    pub fn discard_all(&mut self) {
+        for cell in self.data.iter_mut() {
+            if cell.preview.is_some() {
+                cell.discard();
+            }
+        }
     }
 }

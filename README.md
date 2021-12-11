@@ -8,6 +8,9 @@ Transform
   - Shape select
   - Shape resize
 
+Library
+  - List of prebuilt shapes that can be added on the fly
+
 Scripting - Automatically generate diagram
   - https://github.com/ArthurSonzogni/Diagon
   - Extra

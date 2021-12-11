@@ -1,23 +1,31 @@
 use std::{
+    cell,
     fmt::Display,
     ops::{Index, IndexMut},
 };
 
-use druid::MouseEvent;
+use druid::{keyboard_types::KeyboardEvent, Event, KeyEvent, MouseEvent};
 
-use crate::{shapes::ShapeList, tools::line::LineTool};
+use crate::{
+    data::GridList,
+    shapes::ShapeList,
+    tools::{line::LineTool, text::TextTool},
+};
 
-mod line;
+pub mod line;
+pub mod text;
 
 #[derive(Clone, Copy, PartialEq)]
 pub enum DrawingTools {
     Line = 0,
+    Text = 1,
 }
 
 impl Display for DrawingTools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let op = match self {
             DrawingTools::Line => "LINE",
+            DrawingTools::Text => "TEXT",
         };
         write!(f, "{}", op)
     }
@@ -38,27 +46,10 @@ impl<T> IndexMut<DrawingTools> for Vec<T> {
 }
 
 pub trait ToolControl {
-    fn start(
-        &mut self,
-        event: &MouseEvent,
-        shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    );
-    fn draw(
-        &mut self,
-        event: &MouseEvent,
-        shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    );
-    fn end(
-        &mut self,
-        event: &MouseEvent,
-        shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    );
+    fn start(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
+    fn draw(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
+    fn input(&mut self, event: &KeyEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
+    fn end(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
 }
 
 pub struct ToolManager {
@@ -69,7 +60,7 @@ pub struct ToolManager {
 impl ToolManager {
     pub fn new() -> Self {
         Self {
-            available_tools: vec![Box::new(LineTool::new())],
+            available_tools: vec![Box::new(LineTool::new()), Box::new(TextTool::new())],
             current: DrawingTools::Line,
         }
     }
@@ -84,33 +75,19 @@ impl ToolManager {
 }
 
 impl ToolControl for ToolManager {
-    fn start(
-        &mut self,
-        event: &MouseEvent,
-        shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    ) {
-        self.available_tools[self.current].start(event, shape_list, cell_size, grid);
+    fn start(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
+        self.available_tools[self.current].start(event, shape_list, grid_list);
     }
 
-    fn draw(
-        &mut self,
-        event: &MouseEvent,
-        shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    ) {
-        self.available_tools[self.current].draw(event, shape_list, cell_size, grid);
+    fn draw(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
+        self.available_tools[self.current].draw(event, shape_list, grid_list);
     }
 
-    fn end(
-        &mut self,
-        event: &MouseEvent,
-        shape_list: &mut ShapeList,
-        cell_size: (f64, f64),
-        grid: (usize, usize),
-    ) {
-        self.available_tools[self.current].end(event, shape_list, cell_size, grid);
+    fn end(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
+        self.available_tools[self.current].end(event, shape_list, grid_list);
+    }
+
+    fn input(&mut self, event: &KeyEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
+        self.available_tools[self.current].input(event, shape_list, grid_list);
     }
 }
