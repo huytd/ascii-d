@@ -1,4 +1,4 @@
-use druid::{Data, Widget, WidgetPod};
+use druid::{Data, Event, Widget, WidgetPod};
 pub struct StackLayout<T>
 where
     T: Data,
@@ -27,6 +27,7 @@ impl<T: Data> Widget<T> for StackLayout<T> {
         for child in self
             .children
             .iter_mut()
+            .rev()
             .filter_map(|x| Some(x.widget_mut()))
         {
             child.event(ctx, event, data, env);

@@ -7,12 +7,12 @@ mod tools;
 mod widgets;
 
 use data::ApplicationState;
-use widgets::{grid::CanvasGrid, layout::StackLayout, status_label::StatusLabel};
+use widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget};
 
 fn build_ui() -> impl Widget<ApplicationState> {
     let mut ui = StackLayout::new();
     ui.add_child(Scroll::new(CanvasGrid::new()));
-    ui.add_child(StatusLabel::new());
+    ui.add_child(ToolBarWidget::new());
     ui
 }
 
