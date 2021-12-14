@@ -2,12 +2,14 @@ use std::ops::Add;
 
 use druid::{
     piet::StrokeStyle,
-    widget::{Button, CrossAxisAlignment, Flex, MainAxisAlignment},
-    BoxConstraints, Color, Event, FontDescriptor, FontFamily, MouseEvent, Point, Rect,
+    widget::{Button, Click, CrossAxisAlignment, Flex, Image, MainAxisAlignment},
+    BoxConstraints, Color, Event, FontDescriptor, FontFamily, ImageBuf, MouseEvent, Point, Rect,
     RenderContext, Size, TextLayout, Widget, WidgetPod,
 };
 
 use crate::data::ApplicationState;
+
+use super::image_button::ImageButton;
 
 pub struct ToolBarWidget {
     buttons: WidgetPod<ApplicationState, Flex<ApplicationState>>,
@@ -15,16 +17,45 @@ pub struct ToolBarWidget {
 
 impl ToolBarWidget {
     pub fn new() -> Self {
+        let select_icon =
+            ImageBuf::from_data(include_bytes!("../../assets/select-icon.png")).unwrap();
+        let line_icon = ImageBuf::from_data(include_bytes!("../../assets/line-icon.png")).unwrap();
+        let text_icon = ImageBuf::from_data(include_bytes!("../../assets/text-icon.png")).unwrap();
+        let eraser_icon =
+            ImageBuf::from_data(include_bytes!("../../assets/eraser-icon.png")).unwrap();
         let pod = WidgetPod::new(
             Flex::row()
-                .with_child(Button::new("Select").on_click(|ctx, data, env| {
-                    println!("You clicked");
-                    ctx.set_handled();
-                }))
+                .with_child(
+                    ImageButton::new(select_icon, Size::new(26.0, 26.0)).on_click(
+                        |ctx, data, env| {
+                            println!("You clicked");
+                            ctx.set_handled();
+                        },
+                    ),
+                )
                 .with_spacer(4.0)
-                .with_child(Button::new("Line"))
+                .with_child(ImageButton::new(line_icon, Size::new(26.0, 26.0)).on_click(
+                    |ctx, data, env| {
+                        println!("You clicked");
+                        ctx.set_handled();
+                    },
+                ))
                 .with_spacer(4.0)
-                .with_child(Button::new("Text"))
+                .with_child(ImageButton::new(text_icon, Size::new(26.0, 26.0)).on_click(
+                    |ctx, data, env| {
+                        println!("You clicked");
+                        ctx.set_handled();
+                    },
+                ))
+                .with_spacer(4.0)
+                .with_child(
+                    ImageButton::new(eraser_icon, Size::new(26.0, 26.0)).on_click(
+                        |ctx, data, env| {
+                            println!("You clicked");
+                            ctx.set_handled();
+                        },
+                    ),
+                )
                 .cross_axis_alignment(CrossAxisAlignment::Start)
                 .main_axis_alignment(MainAxisAlignment::Start),
         );
@@ -94,7 +125,7 @@ impl Widget<ApplicationState> for ToolBarWidget {
             .set_origin(ctx, data, env, Point::new(26.0, size.height - 75.0));
         Size {
             width: 100.0,
-            height: 20.0,
+            height: 26.0,
         }
     }
 
