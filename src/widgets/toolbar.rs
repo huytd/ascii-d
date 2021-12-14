@@ -1,15 +1,11 @@
-use std::ops::Add;
-
+use super::image_button::ImageButton;
+use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState};
 use druid::{
     piet::StrokeStyle,
     widget::{Button, Click, CrossAxisAlignment, Flex, Image, MainAxisAlignment},
-    BoxConstraints, Color, Event, FontDescriptor, FontFamily, ImageBuf, MouseEvent, Point, Rect,
-    RenderContext, Size, TextLayout, Widget, WidgetPod,
+    BoxConstraints, Color, Event, EventCtx, FontDescriptor, FontFamily, ImageBuf, MouseEvent,
+    Point, Rect, RenderContext, Selector, Size, TextLayout, Widget, WidgetPod,
 };
-
-use crate::data::ApplicationState;
-
-use super::image_button::ImageButton;
 
 pub struct ToolBarWidget {
     buttons: WidgetPod<ApplicationState, Flex<ApplicationState>>,
@@ -26,32 +22,40 @@ impl ToolBarWidget {
         let pod = WidgetPod::new(
             Flex::row()
                 .with_child(
-                    ImageButton::new(select_icon, Size::new(26.0, 26.0)).on_click(
+                    ImageButton::new(select_icon, Size::new(26.0, 26.0), "select").on_click(
                         |ctx, data, env| {
                             println!("You clicked");
+                            ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with("select"));
                             ctx.set_handled();
                         },
                     ),
                 )
                 .with_spacer(4.0)
-                .with_child(ImageButton::new(line_icon, Size::new(26.0, 26.0)).on_click(
-                    |ctx, data, env| {
-                        println!("You clicked");
-                        ctx.set_handled();
-                    },
-                ))
-                .with_spacer(4.0)
-                .with_child(ImageButton::new(text_icon, Size::new(26.0, 26.0)).on_click(
-                    |ctx, data, env| {
-                        println!("You clicked");
-                        ctx.set_handled();
-                    },
-                ))
-                .with_spacer(4.0)
                 .with_child(
-                    ImageButton::new(eraser_icon, Size::new(26.0, 26.0)).on_click(
+                    ImageButton::new(line_icon, Size::new(26.0, 26.0), "line").on_click(
                         |ctx, data, env| {
                             println!("You clicked");
+                            ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with("line"));
+                            ctx.set_handled();
+                        },
+                    ),
+                )
+                .with_spacer(4.0)
+                .with_child(
+                    ImageButton::new(text_icon, Size::new(26.0, 26.0), "text").on_click(
+                        |ctx, data, env| {
+                            println!("You clicked");
+                            ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with("text"));
+                            ctx.set_handled();
+                        },
+                    ),
+                )
+                .with_spacer(4.0)
+                .with_child(
+                    ImageButton::new(eraser_icon, Size::new(26.0, 26.0), "eraser").on_click(
+                        |ctx, data, env| {
+                            println!("You clicked");
+                            ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with("eraser"));
                             ctx.set_handled();
                         },
                     ),
@@ -85,6 +89,11 @@ impl Widget<ApplicationState> for ToolBarWidget {
                 );
                 if rect.contains(event.pos) {
                     ctx.set_handled();
+                }
+            }
+            Event::Notification(notification) => {
+                if let Some(&name) = notification.get(BUTTON_HIGHLIGHT_COMMAND) {
+                    ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(name));
                 }
             }
             _ => {}

@@ -7,18 +7,22 @@ use druid::{
     UnitPoint, Widget,
 };
 
+use crate::consts::BUTTON_HIGHLIGHT_COMMAND;
+
 pub struct ImageButton<T> {
     image: Image,
     size: Size,
+    tag: String,
     _data: PhantomData<T>,
 }
 
 impl<T: Data> ImageButton<T> {
-    pub fn new(image_buf: ImageBuf, size: Size) -> Self {
+    pub fn new(image_buf: ImageBuf, size: Size, tag: &str) -> Self {
         Self {
             image: Image::new(image_buf),
             _data: PhantomData,
             size,
+            tag: tag.to_string(),
         }
     }
 
@@ -44,6 +48,16 @@ impl<T: Data> Widget<T> for ImageButton<T> {
                     ctx.request_paint();
                 }
                 ctx.set_active(false);
+            }
+            Event::Command(cmd) => {
+                println!("{:?}", cmd);
+                if let Some(&tag) = cmd.get(BUTTON_HIGHLIGHT_COMMAND) {
+                    if self.tag.eq(tag) {
+                        ctx.set_active(true);
+                    } else {
+                        ctx.set_active(false);
+                    }
+                }
             }
             _ => (),
         }
@@ -86,6 +100,8 @@ impl<T: Data> Widget<T> for ImageButton<T> {
 
         let border_color = if is_hot && !ctx.is_disabled() {
             env.get(theme::BORDER_LIGHT)
+        } else if is_active {
+            env.get(theme::PRIMARY_LIGHT)
         } else {
             env.get(theme::BORDER_DARK)
         };
