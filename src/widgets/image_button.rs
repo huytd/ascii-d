@@ -13,16 +13,18 @@ pub struct ImageButton<T> {
     image: Image,
     size: Size,
     tag: String,
+    highlighted: bool,
     _data: PhantomData<T>,
 }
 
 impl<T: Data> ImageButton<T> {
-    pub fn new(image_buf: ImageBuf, size: Size, tag: &str) -> Self {
+    pub fn new(image_buf: ImageBuf, size: Size, tag: String) -> Self {
         Self {
             image: Image::new(image_buf),
             _data: PhantomData,
+            highlighted: false,
+            tag,
             size,
-            tag: tag.to_string(),
         }
     }
 
@@ -50,13 +52,13 @@ impl<T: Data> Widget<T> for ImageButton<T> {
                 ctx.set_active(false);
             }
             Event::Command(cmd) => {
-                println!("{:?}", cmd);
-                if let Some(&tag) = cmd.get(BUTTON_HIGHLIGHT_COMMAND) {
+                if let Some(tag) = cmd.get(BUTTON_HIGHLIGHT_COMMAND) {
                     if self.tag.eq(tag) {
-                        ctx.set_active(true);
+                        self.highlighted = true;
                     } else {
-                        ctx.set_active(false);
+                        self.highlighted = false;
                     }
+                    ctx.request_paint();
                 }
             }
             _ => (),
@@ -88,7 +90,7 @@ impl<T: Data> Widget<T> for ImageButton<T> {
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &T, env: &Env) {
-        let is_active = ctx.is_active() && !ctx.is_disabled();
+        let is_active = self.highlighted;
         let is_hot = ctx.is_hot();
         let size = ctx.size();
         let stroke_width = env.get(theme::BUTTON_BORDER_WIDTH);

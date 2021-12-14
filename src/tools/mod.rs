@@ -19,6 +19,8 @@ pub mod text;
 pub enum DrawingTools {
     Line = 0,
     Text = 1,
+    Eraser = 2,
+    Select = 3,
 }
 
 impl Display for DrawingTools {
@@ -26,6 +28,8 @@ impl Display for DrawingTools {
         let op = match self {
             DrawingTools::Line => "LINE",
             DrawingTools::Text => "TEXT",
+            DrawingTools::Eraser => "ERASER",
+            DrawingTools::Select => "SELECT",
         };
         write!(f, "{}", op)
     }
