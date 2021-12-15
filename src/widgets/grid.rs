@@ -1,8 +1,8 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line, Code, Color, Event, FontDescriptor, FontFamily, Point, Rect, RenderContext, Size,
-    TextLayout, Widget,
+    kurbo::Line, Code, Color, Cursor, Event, FontDescriptor, FontFamily, Point, Rect,
+    RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
@@ -150,6 +150,13 @@ impl Widget<ApplicationState> for CanvasGrid {
             if old_data.mode == DrawingTools::Text {
                 self.shape_list.commit_all(&mut self.grid_list);
                 self.grid_list.clear_highlight_all();
+            }
+
+            match data.mode {
+                DrawingTools::Select => ctx.set_cursor(&Cursor::Arrow),
+                DrawingTools::Line => ctx.set_cursor(&Cursor::Crosshair),
+                DrawingTools::Text => ctx.set_cursor(&Cursor::IBeam),
+                DrawingTools::Eraser => ctx.set_cursor(&Cursor::Crosshair),
             }
         }
     }
