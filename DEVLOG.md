@@ -37,7 +37,7 @@ Honestly, I still don't like how tags are treated as `ImageButton` main property
 
 ## Dec 11, 2021
 
-Well, it almost took me a month to finish the text edit function. I had to make many underlying changes like rewriting `GridList` and `ShapeList` types to manage the interaction between `Tool` `Shape` and the actual list. More on this in [DEVELOPMENT.md](DEVELOPMENT.md).
+Well, it almost took me a month to finish the text edit function. I had to make many underlying changes like rewriting `GridList` and `ShapeList` types to manage the interaction between `Tool` `Shape` and the actual list. More on this in [ARCHITECT.md](ARCHITECT.md).
 
 ![](_meta/text-edit.png)
 

@@ -1,24 +1,11 @@
+# ASCII-d
+
+ASCII-d is a cross-platform ASCII diagram drawing application, with focus on minimal UI.
+
+![](_meta/toolbar-final.gif)
+
+Still heavily WIP.
+
 # Development progress
 
-See [DEVLOG.md] for the development progress.
-
-# Roadmap
-
-Drawing
-  - Shape drawing
-  - Line drawing / Arrow
-  - Free-hand drawing
-
-Transform
-  - Shape select
-  - Shape resize
-
-Library
-  - List of prebuilt shapes that can be added on the fly
-
-Scripting - Automatically generate diagram
-  - https://github.com/ArthurSonzogni/Diagon
-  - Extra
-    - Export to SVG and PNG raw
-    - Export to SVG and PNG grahics mode
-      https://github.com/danpersa/ascii-diag
+See [DEVLOG.md](DEVLOG.md) for the development progress. Or [ARCHITECT.md](ARCHITECT.md) for architecture and technical details.
