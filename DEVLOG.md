@@ -27,7 +27,7 @@ Each `ImageButton` is created with a tag. Every time we click a button, we send 
        │ Command(BUTTON_HIGHLIGHT)
        ├────────┬──────────┐
        │        │          │
-       ▼       ▼         ▼
+       ▼        ▼          ▼
    ┌──────┐  ┌──────┐  ┌──────┐
    │btn_1 │  │btn_1 │  │btn_1 │
    └──────┘  └──────┘  └──────┘
