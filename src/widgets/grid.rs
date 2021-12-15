@@ -61,7 +61,6 @@ impl CanvasGrid {
                     }
                 }
             }
-            println!("INIT GRID");
         }
     }
 }
@@ -76,31 +75,16 @@ impl Widget<ApplicationState> for CanvasGrid {
         match event {
             Event::WindowConnected => {
                 // Have to request focus in order to get keyboard event
-                data.mode = self.tool_manager.get_active_tool().to_string();
                 ctx.request_focus();
             }
             Event::KeyDown(event) => {
-                if self.tool_manager.get_active_tool() != DrawingTools::Text {
-                    match event.code {
-                        Code::Digit1 => {
-                            self.tool_manager.set_tool(DrawingTools::Line);
-                            self.shape_list.commit_all(&mut self.grid_list);
-                            self.grid_list.clear_highlight_all();
-                        }
-                        Code::Digit2 => self.tool_manager.set_tool(DrawingTools::Text),
-                        _ => {}
+                match event.code {
+                    Code::Escape => {
+                        data.mode = DrawingTools::Select;
                     }
-                } else {
-                    match event.code {
-                        Code::Escape => {
-                            self.tool_manager.set_tool(DrawingTools::Line);
-                            self.shape_list.commit_all(&mut self.grid_list);
-                            self.grid_list.clear_highlight_all();
-                        }
-                        _ => {}
-                    }
+                    _ => {}
                 }
-                data.mode = self.tool_manager.get_active_tool().to_string();
+
                 if let Some((cell_width, cell_height)) = self.cell_size {
                     self.tool_manager
                         .input(event, &mut self.shape_list, &mut self.grid_list);
@@ -157,10 +141,17 @@ impl Widget<ApplicationState> for CanvasGrid {
     fn update(
         &mut self,
         ctx: &mut druid::UpdateCtx,
-        _old_data: &ApplicationState,
-        _data: &ApplicationState,
+        old_data: &ApplicationState,
+        data: &ApplicationState,
         _env: &druid::Env,
     ) {
+        if old_data.mode != data.mode {
+            self.tool_manager.set_tool(data.mode);
+            if old_data.mode == DrawingTools::Text {
+                self.shape_list.commit_all(&mut self.grid_list);
+                self.grid_list.clear_highlight_all();
+            }
+        }
     }
 
     fn layout(

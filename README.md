@@ -1,4 +1,9 @@
+# Development progress
+
+See [DEVLOG.md] for the development progress.
+
 # Roadmap
+
 Drawing
   - Shape drawing
   - Line drawing / Arrow

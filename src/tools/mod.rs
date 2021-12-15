@@ -4,7 +4,7 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use druid::{keyboard_types::KeyboardEvent, Event, KeyEvent, MouseEvent};
+use druid::{keyboard_types::KeyboardEvent, Data, Event, KeyEvent, MouseEvent};
 
 use crate::{
     data::GridList,
@@ -12,20 +12,28 @@ use crate::{
     tools::{line::LineTool, text::TextTool},
 };
 
+use self::{eraser::EraserTool, select::SelectTool};
+
+pub mod eraser;
 pub mod line;
+pub mod select;
 pub mod text;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Data)]
 pub enum DrawingTools {
-    Line = 0,
-    Text = 1,
+    Select = 0,
+    Line = 1,
+    Text = 2,
+    Eraser = 3,
 }
 
 impl Display for DrawingTools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let op = match self {
+            DrawingTools::Select => "SELECT",
             DrawingTools::Line => "LINE",
             DrawingTools::Text => "TEXT",
+            DrawingTools::Eraser => "ERASER",
         };
         write!(f, "{}", op)
     }
@@ -60,8 +68,13 @@ pub struct ToolManager {
 impl ToolManager {
     pub fn new() -> Self {
         Self {
-            available_tools: vec![Box::new(LineTool::new()), Box::new(TextTool::new())],
-            current: DrawingTools::Line,
+            available_tools: vec![
+                Box::new(SelectTool::new()),
+                Box::new(LineTool::new()),
+                Box::new(TextTool::new()),
+                Box::new(EraserTool::new()),
+            ],
+            current: DrawingTools::Select,
         }
     }
 
