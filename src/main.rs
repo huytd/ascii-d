@@ -21,7 +21,7 @@ fn main() -> Result<(), PlatformError> {
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(WindowDesc::new(build_ui()).title("ASCII-d"));
     app.launch(ApplicationState {
-        mode: String::new(),
+        mode: tools::DrawingTools::Select,
     })?;
     Ok(())
 }

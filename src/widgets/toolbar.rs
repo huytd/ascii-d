@@ -27,11 +27,10 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Select.to_string(),
                     )
-                    .on_click(|ctx, data, env| {
-                        println!("You clicked");
-                        ctx.submit_notification(
-                            BUTTON_HIGHLIGHT_COMMAND.with(DrawingTools::Select.to_string()),
-                        );
+                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                        let tool = DrawingTools::Select;
+                        data.mode = tool;
+                        ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
                 )
@@ -42,11 +41,10 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Line.to_string(),
                     )
-                    .on_click(|ctx, data, env| {
-                        println!("You clicked");
-                        ctx.submit_notification(
-                            BUTTON_HIGHLIGHT_COMMAND.with(DrawingTools::Line.to_string()),
-                        );
+                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                        let tool = DrawingTools::Line;
+                        data.mode = tool;
+                        ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
                 )
@@ -57,11 +55,10 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Text.to_string(),
                     )
-                    .on_click(|ctx, data, env| {
-                        println!("You clicked");
-                        ctx.submit_notification(
-                            BUTTON_HIGHLIGHT_COMMAND.with(DrawingTools::Text.to_string()),
-                        );
+                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                        let tool = DrawingTools::Text;
+                        data.mode = tool;
+                        ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
                 )
@@ -72,11 +69,10 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Eraser.to_string(),
                     )
-                    .on_click(|ctx, data, env| {
-                        println!("You clicked");
-                        ctx.submit_notification(
-                            BUTTON_HIGHLIGHT_COMMAND.with(DrawingTools::Eraser.to_string()),
-                        );
+                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                        let tool = DrawingTools::Eraser;
+                        data.mode = tool;
+                        ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
                 )
@@ -98,6 +94,9 @@ impl Widget<ApplicationState> for ToolBarWidget {
         self.buttons.event(ctx, event, data, env);
         // Prevent the mouse event to be propagated to underlying widgets
         match event {
+            Event::WindowConnected => {
+                ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
+            }
             Event::MouseDown(event) | Event::MouseUp(event) | Event::MouseMove(event) => {
                 let size = ctx.size();
                 let content_width = self.buttons.layout_rect().width();
@@ -137,6 +136,9 @@ impl Widget<ApplicationState> for ToolBarWidget {
         data: &ApplicationState,
         env: &druid::Env,
     ) {
+        if old_data.mode != data.mode {
+            ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
+        }
         self.buttons.update(ctx, data, env);
         ctx.request_paint();
     }

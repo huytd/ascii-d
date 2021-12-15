@@ -1,10 +1,13 @@
 use druid::Data;
 
-use crate::consts::{CHAR_NEWLINE, CHAR_SPACE};
+use crate::{
+    consts::{CHAR_NEWLINE, CHAR_SPACE},
+    tools::{DrawingTools, ToolManager},
+};
 
 #[derive(Clone, PartialEq, Data)]
 pub struct ApplicationState {
-    pub mode: String,
+    pub mode: DrawingTools,
 }
 
 #[derive(Clone, Copy)]
