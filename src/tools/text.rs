@@ -1,17 +1,18 @@
 use druid::KbKey;
 
-use crate::{
-    data::GridList,
-    shapes::{text::TextShape, ShapeList},
-};
+use crate::{data::GridList, shapes::ShapeList};
 
 use super::ToolControl;
 
-pub struct TextTool;
+pub struct TextTool {
+    cursor_position: (usize, usize),
+}
 
 impl TextTool {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            cursor_position: (0, 0),
+        }
     }
 }
 
@@ -23,16 +24,19 @@ impl ToolControl for TextTool {
         grid_list: &mut GridList,
     ) {
         let (cell_width, cell_height) = grid_list.cell_size;
-        let mouse_row = (event.pos.y / cell_height) as usize;
-        let mouse_col = (event.pos.x / cell_width) as usize;
-        shape_list.add_shape(Box::new(TextShape::new(mouse_row, mouse_col, "")));
+        let (_, cols) = grid_list.grid_size;
+        let row = (event.pos.y / cell_height) as usize;
+        let col = (event.pos.x / cell_width) as usize;
+        self.cursor_position = (row, col);
+        let i = row * cols + col;
+        grid_list.highlight(i);
     }
 
     fn draw(
         &mut self,
         _event: &druid::MouseEvent,
         _shape_list: &mut ShapeList,
-        _grid_list: &mut GridList,
+        grid_list: &mut GridList,
     ) {
     }
 
@@ -48,21 +52,48 @@ impl ToolControl for TextTool {
         &mut self,
         event: &druid::KeyEvent,
         shape_list: &mut ShapeList,
-        _grid_list: &mut GridList,
+        grid_list: &mut GridList,
     ) {
-        if let Some(text) = shape_list.data.last_mut() {
-            if let Some(text) = text.as_any_mut().downcast_mut::<TextShape>() {
-                match event.clone().key {
-                    KbKey::Character(c) => {
-                        text.push_char(c.chars().next().unwrap());
-                    }
-                    KbKey::Backspace => {
-                        text.pop_char();
-                    }
-                    KbKey::ArrowDown => {}
-                    _ => {}
-                }
+        let (_, cols) = grid_list.grid_size;
+        let (row, col) = self.cursor_position;
+        let i = row * cols + col;
+        grid_list.highlight(i);
+
+        match event.clone().key {
+            KbKey::Character(c) => {
+                let c = c.chars().next().unwrap();
+                grid_list.get(i).set_content(c);
+                self.cursor_position.1 += 1;
             }
+            KbKey::Backspace => {
+                grid_list.get(i).set_content(' ');
+                self.cursor_position.1 -= 1;
+            }
+            KbKey::ArrowDown => {}
+            _ => {}
         }
+
+        // if let Some(text) = shape_list.data.last_mut() {
+        //     if let Some(text) = text.as_any_mut().downcast_mut::<TextShape>() {
+        //         match event.clone().key {
+        //             KbKey::Character(c) => {
+        //                 // text.push_char(c.chars().next().unwrap());
+        //                 let c = c.chars().next().unwrap();
+        //                 self.cursor_position.1 += 1;
+        //             }
+        //             KbKey::Backspace => {
+        //                 text.pop_char();
+        //                 self.cursor_position.1 -= 1;
+        //             }
+        //             KbKey::ArrowDown => {}
+        //             _ => {}
+        //         }
+
+        //         let (_, cols) = grid_list.grid_size;
+        //         let (row, col) = self.cursor_position;
+        //         let i = row * cols + col;
+        //         grid_list.highlight(i);
+        //     }
+        // }
     }
 }

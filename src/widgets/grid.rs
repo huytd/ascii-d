@@ -145,7 +145,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             self.tool_manager.set_tool(data.mode);
             if old_data.mode == DrawingTools::Text {
                 self.shape_list.commit_all(&mut self.grid_list);
-                self.grid_list.clear_highlight_all();
+                self.grid_list.clear_all_highlight();
             }
 
             match data.mode {

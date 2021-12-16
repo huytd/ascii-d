@@ -106,11 +106,11 @@ impl GridList {
     }
 
     pub fn highlight(&mut self, index: usize) {
-        self.clear_highlight_all();
+        self.clear_all_highlight();
         self.data[index].highlight();
     }
 
-    pub fn clear_highlight_all(&mut self) {
+    pub fn clear_all_highlight(&mut self) {
         for cell in self.data.iter_mut() {
             if cell.highlighted {
                 cell.clear_highlight();
