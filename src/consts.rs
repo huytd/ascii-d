@@ -1,6 +1,4 @@
-use druid::{FontDescriptor, Key, Selector};
-
-pub const FONT_KEY: Key<FontDescriptor> = Key::new("fonts.IosevkaMono-Regular");
+use druid::Selector;
 
 pub const CHAR_HOR_L: char = '─';
 pub const CHAR_VER_L: char = '│';

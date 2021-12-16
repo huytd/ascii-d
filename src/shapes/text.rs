@@ -10,7 +10,7 @@ pub struct TextShape {
 
 impl ShapeRender for TextShape {
     fn draw(&mut self, grid_buffer: &mut crate::data::GridList) {
-        let (rows, cols) = grid_buffer.grid_size;
+        let (_rows, cols) = grid_buffer.grid_size;
         let (row, col) = self.position;
 
         for index in 0..=self.max_len {
@@ -23,7 +23,7 @@ impl ShapeRender for TextShape {
         }
     }
 
-    fn commit(&mut self, grid_buffer: &mut crate::data::GridList) {
+    fn commit(&mut self, _grid_buffer: &mut crate::data::GridList) {
         self.preview = false;
     }
 

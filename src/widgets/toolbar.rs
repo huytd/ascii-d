@@ -1,10 +1,8 @@
 use super::image_button::ImageButton;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
-    piet::StrokeStyle,
-    widget::{Button, Click, CrossAxisAlignment, Flex, Image, MainAxisAlignment},
-    BoxConstraints, Color, Event, EventCtx, FontDescriptor, FontFamily, ImageBuf, MouseEvent,
-    Point, Rect, RenderContext, Selector, Size, TextLayout, Widget, WidgetPod,
+    widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
+    Color, Event, ImageBuf, Point, Rect, RenderContext, Size, Widget, WidgetPod,
 };
 
 pub struct ToolBarWidget {
@@ -27,7 +25,7 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Select.to_string(),
                     )
-                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                    .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Select;
                         data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
@@ -41,7 +39,7 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Line.to_string(),
                     )
-                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                    .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Line;
                         data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
@@ -55,7 +53,7 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Text.to_string(),
                     )
-                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                    .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Text;
                         data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
@@ -69,7 +67,7 @@ impl ToolBarWidget {
                         Size::new(26.0, 26.0),
                         DrawingTools::Eraser.to_string(),
                     )
-                    .on_click(|ctx, data: &mut ApplicationState, env| {
+                    .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Eraser;
                         data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));

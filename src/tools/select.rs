@@ -11,33 +11,33 @@ impl SelectTool {
 impl ToolControl for SelectTool {
     fn start(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 
     fn draw(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 
     fn input(
         &mut self,
-        event: &druid::KeyEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::KeyEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 
     fn end(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 }

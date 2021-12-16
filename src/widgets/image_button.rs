@@ -3,8 +3,7 @@ use std::marker::PhantomData;
 use druid::{
     theme,
     widget::{Click, ControllerHost, Image},
-    Data, Env, Event, EventCtx, ImageBuf, LifeCycle, LinearGradient, RenderContext, Size,
-    UnitPoint, Widget,
+    Data, Env, Event, EventCtx, ImageBuf, LifeCycle, RenderContext, Size, Widget,
 };
 
 use crate::consts::BUTTON_HIGHLIGHT_COMMAND;
@@ -37,7 +36,7 @@ impl<T: Data> ImageButton<T> {
 }
 
 impl<T: Data> Widget<T> for ImageButton<T> {
-    fn event(&mut self, ctx: &mut EventCtx, event: &druid::Event, data: &mut T, env: &Env) {
+    fn event(&mut self, ctx: &mut EventCtx, event: &druid::Event, _data: &mut T, _env: &Env) {
         match event {
             Event::MouseDown(_) => {
                 if !ctx.is_disabled() {
@@ -69,22 +68,22 @@ impl<T: Data> Widget<T> for ImageButton<T> {
         &mut self,
         ctx: &mut druid::LifeCycleCtx,
         event: &druid::LifeCycle,
-        data: &T,
-        env: &Env,
+        _data: &T,
+        _env: &Env,
     ) {
         if let LifeCycle::HotChanged(_) | LifeCycle::DisabledChanged(_) = event {
             ctx.request_paint();
         }
     }
 
-    fn update(&mut self, ctx: &mut druid::UpdateCtx, old_data: &T, data: &T, env: &Env) {}
+    fn update(&mut self, _ctx: &mut druid::UpdateCtx, _old_data: &T, _data: &T, _env: &Env) {}
 
     fn layout(
         &mut self,
-        ctx: &mut druid::LayoutCtx,
-        bc: &druid::BoxConstraints,
-        data: &T,
-        env: &Env,
+        _ctx: &mut druid::LayoutCtx,
+        _bc: &druid::BoxConstraints,
+        _data: &T,
+        _env: &Env,
     ) -> druid::Size {
         self.size
     }

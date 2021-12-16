@@ -1,8 +1,8 @@
-use druid::{keyboard_types, KbKey};
+use druid::KbKey;
 
 use crate::{
     data::GridList,
-    shapes::{text::TextShape, ShapeList, ShapeRender},
+    shapes::{text::TextShape, ShapeList},
 };
 
 use super::ToolControl;
@@ -30,17 +30,17 @@ impl ToolControl for TextTool {
 
     fn draw(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut ShapeList,
-        grid_list: &mut GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut ShapeList,
+        _grid_list: &mut GridList,
     ) {
     }
 
     fn end(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut ShapeList,
-        grid_list: &mut GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut ShapeList,
+        _grid_list: &mut GridList,
     ) {
     }
 
@@ -48,10 +48,10 @@ impl ToolControl for TextTool {
         &mut self,
         event: &druid::KeyEvent,
         shape_list: &mut ShapeList,
-        grid_list: &mut GridList,
+        _grid_list: &mut GridList,
     ) {
         if let Some(text) = shape_list.data.last_mut() {
-            if let Some(mut text) = text.as_any_mut().downcast_mut::<TextShape>() {
+            if let Some(text) = text.as_any_mut().downcast_mut::<TextShape>() {
                 match event.clone().key {
                     KbKey::Character(c) => {
                         text.push_char(c.chars().next().unwrap());

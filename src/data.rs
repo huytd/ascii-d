@@ -2,7 +2,7 @@ use druid::Data;
 
 use crate::{
     consts::{CHAR_NEWLINE, CHAR_SPACE},
-    tools::{DrawingTools, ToolManager},
+    tools::DrawingTools,
 };
 
 #[derive(Clone, PartialEq, Data)]
