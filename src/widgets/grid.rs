@@ -1,8 +1,8 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line, Code, Color, Cursor, Event, FontDescriptor, FontFamily, Point, Rect,
-    RenderContext, Size, TextLayout, Widget,
+    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontDescriptor, FontWeight, LifeCycleCtx,
+    Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
@@ -11,6 +11,8 @@ use crate::{
     shapes::ShapeList,
     tools::{DrawingTools, ToolControl, ToolManager},
 };
+
+pub const FONT: &[u8] = include_bytes!("../../assets/iosevka-mono-regular.ttf");
 
 pub struct CanvasGrid {
     width: f64,
@@ -25,8 +27,11 @@ pub struct CanvasGrid {
     tool_manager: ToolManager,
 }
 impl CanvasGrid {
-    pub fn new() -> Self {
-        let font = FontDescriptor::new(FontFamily::MONOSPACE).with_size(16.0);
+    pub fn new(ctx: &mut LifeCycleCtx) -> Self {
+        let monospace_font = ctx.text().load_font(FONT).unwrap();
+        let font = FontDescriptor::new(monospace_font.clone())
+            .with_weight(FontWeight::REGULAR)
+            .with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();
         letterbox.set_font(font.clone());
         letterbox.set_text("H".to_string());
@@ -84,11 +89,8 @@ impl Widget<ApplicationState> for CanvasGrid {
                     }
                     _ => {}
                 }
-
-                if let Some((cell_width, cell_height)) = self.cell_size {
-                    self.tool_manager
-                        .input(event, &mut self.shape_list, &mut self.grid_list);
-                }
+                self.tool_manager
+                    .input(event, &mut self.shape_list, &mut self.grid_list);
                 ctx.request_update();
             }
             Event::MouseMove(event) => {
@@ -96,7 +98,6 @@ impl Widget<ApplicationState> for CanvasGrid {
                     let mouse_row = (event.pos.y / cell_height) as usize;
                     let mouse_col = (event.pos.x / cell_width) as usize;
                     self.mouse_position = (mouse_row, mouse_col);
-
                     if self.is_mouse_down {
                         self.tool_manager
                             .draw(event, &mut self.shape_list, &mut self.grid_list);
@@ -106,20 +107,15 @@ impl Widget<ApplicationState> for CanvasGrid {
             }
             Event::MouseDown(event) => {
                 self.is_mouse_down = true;
-                if let Some((cell_width, cell_height)) = self.cell_size {
-                    self.tool_manager
-                        .start(event, &mut self.shape_list, &mut self.grid_list);
-                }
+                self.tool_manager
+                    .start(event, &mut self.shape_list, &mut self.grid_list);
             }
             Event::MouseUp(event) => {
                 self.is_mouse_down = false;
-
-                if let Some((cell_width, cell_height)) = self.cell_size {
-                    self.tool_manager
-                        .end(event, &mut self.shape_list, &mut self.grid_list);
-                    self.shape_list.commit(&mut self.grid_list);
-                    ctx.request_update();
-                }
+                self.tool_manager
+                    .end(event, &mut self.shape_list, &mut self.grid_list);
+                self.shape_list.commit(&mut self.grid_list);
+                ctx.request_update();
             }
             _ => {}
         }
@@ -200,7 +196,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                     (bound.y1 / cell_height) as usize,
                 );
                 let cols = (self.width / cell_width) as usize;
-                let rows = (self.height / cell_height) as usize;
+                let _rows = (self.height / cell_height) as usize;
 
                 for row in (start.1)..(end.1) {
                     let row = row as f64;
