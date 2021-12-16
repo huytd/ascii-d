@@ -1,6 +1,4 @@
-# Development Log
-
-## Dec 14, 2021
+# Dec 14, 2021
 
 It turned out Druid didn't have built-in support for Image inside a Button, lol, so I need to build a custom `ImageButton` widget. Most of the implementations are copied from the built-in Button widget.
 
@@ -35,7 +33,7 @@ Each `ImageButton` is created with a tag. Every time we click a button, we send 
 
 Honestly, I still don't like how tags are treated as `ImageButton` main property. That's something to be refactored later.
 
-## Dec 11, 2021
+# Dec 11, 2021
 
 Well, it almost took me a month to finish the text edit function. I had to make many underlying changes like rewriting `GridList` and `ShapeList` types to manage the interaction between `Tool` `Shape` and the actual list. More on this in [ARCHITECT.md](ARCHITECT.md).
 
@@ -45,7 +43,7 @@ Getting back to this project after a month-long break, at first, it seemed like 
 
 I decided to change the UI from dark theme to light. Now that the basic functionalities are ready, it's time to focus more on the UI. The next update will be about the toolbar.
 
-## Oct 21, 2021
+# Oct 21, 2021
 
 Before the current version, I’ve been trying to prototype ASCII-d using different languages/tech stack, one of them is the obvious choice: Electron. Just to get a glimpse of how my idea looks in action.
 
@@ -73,7 +71,7 @@ Anyway, it's still a good choice for applications like ASCII-d. So let just use 
 
 That’s it for today, see you on the next update!
 
-## Oct 10, 2021
+# Oct 10, 2021
 
 It’s been a while since my last attempt to start a SaaS, and I’m starting a new project, this time, I’ll be building ASCII-d, a tool for drawing ASCII diagrams.
 
