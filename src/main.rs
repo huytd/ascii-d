@@ -1,4 +1,10 @@
-use druid::{widget::Scroll, AppLauncher, PlatformError, Widget, WidgetPod, WindowDesc};
+use consts::FONT_KEY;
+use druid::{
+    piet::Text,
+    widget::{Scroll, SizedBox, WidgetExt},
+    AppLauncher, FontDescriptor, FontWeight, Key, LifeCycle, PlatformError, Widget, WidgetPod,
+    WindowDesc,
+};
 
 mod consts;
 mod data;
@@ -9,17 +15,16 @@ mod widgets;
 use data::ApplicationState;
 use widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget};
 
+pub const FONT: &[u8] = include_bytes!("../assets/iosevka-mono-regular.ttf");
+
 struct MainWindow {
     content: WidgetPod<ApplicationState, Box<dyn Widget<ApplicationState>>>,
 }
 
 impl MainWindow {
     pub fn new() -> Self {
-        let mut ui = StackLayout::new();
-        ui.add_child(Scroll::new(CanvasGrid::new()));
-        ui.add_child(ToolBarWidget::new());
         Self {
-            content: WidgetPod::new(Box::new(ui)),
+            content: WidgetPod::new(Box::new(SizedBox::empty())),
         }
     }
 }
@@ -42,6 +47,19 @@ impl Widget<ApplicationState> for MainWindow {
         data: &ApplicationState,
         env: &druid::Env,
     ) {
+        if let LifeCycle::WidgetAdded = event {
+            let monospace_font = ctx.text().load_font(FONT).unwrap();
+            let mut ui = StackLayout::new();
+            ui.add_child(Scroll::new(CanvasGrid::new()));
+            ui.add_child(ToolBarWidget::new());
+            self.content = WidgetPod::new(Box::new(ui.env_scope(move |env, _data| {
+                let mono_regular =
+                    FontDescriptor::new(monospace_font.clone()).with_weight(FontWeight::REGULAR);
+
+                env.set(FONT_KEY, mono_regular.clone());
+            })));
+        }
+
         self.content.lifecycle(ctx, event, data, env);
     }
 

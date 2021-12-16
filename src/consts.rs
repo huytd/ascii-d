@@ -1,6 +1,6 @@
-use druid::Selector;
+use druid::{FontDescriptor, Key, Selector};
 
-use crate::tools::DrawingTools;
+pub const FONT_KEY: Key<FontDescriptor> = Key::new("fonts.IosevkaMono-Regular");
 
 pub const CHAR_HOR_L: char = '─';
 pub const CHAR_VER_L: char = '│';
