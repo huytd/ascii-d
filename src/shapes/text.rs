@@ -20,14 +20,6 @@ impl ShapeRender for TextShape {
             } else {
                 grid_buffer.get(i).set_content(' ');
             }
-            if self.preview && self.content.len() > 0 && self.content.len() == index {
-                grid_buffer.highlight(i);
-            }
-        }
-
-        if self.preview && self.content.len() == 0 {
-            let first_cell = row * cols + col;
-            grid_buffer.highlight(first_cell);
         }
     }
 

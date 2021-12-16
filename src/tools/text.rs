@@ -59,6 +59,7 @@ impl ToolControl for TextTool {
                     KbKey::Backspace => {
                         text.pop_char();
                     }
+                    KbKey::ArrowDown => {}
                     _ => {}
                 }
             }
