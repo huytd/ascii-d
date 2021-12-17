@@ -6,12 +6,14 @@ use super::ToolControl;
 
 pub struct TextTool {
     cursor_position: (usize, usize),
+    last_edit_position: Option<(usize, usize)>,
 }
 
 impl TextTool {
     pub fn new() -> Self {
         Self {
             cursor_position: (0, 0),
+            last_edit_position: None,
         }
     }
 }
@@ -55,45 +57,51 @@ impl ToolControl for TextTool {
         grid_list: &mut GridList,
     ) {
         let (_, cols) = grid_list.grid_size;
-        let (row, col) = self.cursor_position;
-        let i = row * cols + col;
-        grid_list.highlight(i);
 
         match event.clone().key {
             KbKey::Character(c) => {
+                if self.last_edit_position.is_none() {
+                    self.last_edit_position = Some(self.cursor_position);
+                }
                 let c = c.chars().next().unwrap();
+                let (row, col) = self.cursor_position;
+                let i = row * cols + col;
                 grid_list.get(i).set_content(c);
                 self.cursor_position.1 += 1;
             }
             KbKey::Backspace => {
-                grid_list.get(i).set_content(' ');
                 self.cursor_position.1 -= 1;
+                let (row, col) = self.cursor_position;
+                let i = row * cols + col;
+                grid_list.get(i).set_content(' ');
             }
-            KbKey::ArrowDown => {}
+            KbKey::ArrowDown => {
+                self.cursor_position.0 += 1;
+                self.last_edit_position = None;
+            }
+            KbKey::ArrowUp => {
+                self.cursor_position.0 -= 1;
+                self.last_edit_position = None;
+            }
+            KbKey::ArrowRight => {
+                self.cursor_position.1 += 1;
+                self.last_edit_position = None;
+            }
+            KbKey::ArrowLeft => {
+                self.cursor_position.1 -= 1;
+                self.last_edit_position = None;
+            }
+            KbKey::Enter => {
+                if let Some(pos) = self.last_edit_position {
+                    self.cursor_position = (pos.0 + 1, pos.1);
+                    self.last_edit_position = Some(self.cursor_position);
+                }
+            }
             _ => {}
         }
 
-        // if let Some(text) = shape_list.data.last_mut() {
-        //     if let Some(text) = text.as_any_mut().downcast_mut::<TextShape>() {
-        //         match event.clone().key {
-        //             KbKey::Character(c) => {
-        //                 // text.push_char(c.chars().next().unwrap());
-        //                 let c = c.chars().next().unwrap();
-        //                 self.cursor_position.1 += 1;
-        //             }
-        //             KbKey::Backspace => {
-        //                 text.pop_char();
-        //                 self.cursor_position.1 -= 1;
-        //             }
-        //             KbKey::ArrowDown => {}
-        //             _ => {}
-        //         }
-
-        //         let (_, cols) = grid_list.grid_size;
-        //         let (row, col) = self.cursor_position;
-        //         let i = row * cols + col;
-        //         grid_list.highlight(i);
-        //     }
-        // }
+        let (row, col) = self.cursor_position;
+        let i = row * cols + col;
+        grid_list.highlight(i);
     }
 }
