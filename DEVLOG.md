@@ -1,3 +1,45 @@
+# Dec 17, 2021
+
+Okayyy, I finally make the text editing experience feels better. By changing a lot in the `TextTool`. But let's take a step back and review what was the issue with the initial implementation.
+
+Previously, each line of text is a `TextShape`, when the user inserted a text (by clicking on any grid cell), a new `TextShape` will be created. All subsequence edits will modify the attached string of that shape. During the rendering phase, the last created `TextShape` will get rendered on the screen. Once the user stopped the text edit (by switching to another tool), the current `TextShape` will be committed.
+
+```
+ ┌──────────────┐
+ │Text Edit Tool│
+ └─────┬────────┘
+       │              ┌────────────┐            ┌───────────┐
+       ├──start()────►│ Text Shape ├──render()──► Main Grid │
+       │              └─────▲──────┘            └───────────┘
+       │                    │
+       └─keyboard input ────┘
+```
+
+This approach works fine, but in the next iteration, I want to support cursor moving — the user can freely move the cursor and insert new text anywhere around the grid while editing. To do this, it will make more sense if we insert text based on the cursor, instead of grouping them with `TextShape`.
+
+So I decided to just remove the `TextShape`, from now on, `TextTool` will manage a Cursor, the new text will be inserted directly into the grid, at Cursor's position.
+
+```
+ ┌──────────────┐
+ │Text Edit Tool│
+ └─────┬────────┘
+       │
+       └─keyboard input
+           │                                 ┌───────────┐
+           └────────► Cursor ─────►render()──► Main Grid │
+                                             └───────────┘
+```
+
+This approach enabled some improvement in the editing experience, for example, we can move the cursor around with arrow keys and insert text anywhere:
+
+![](_meta/text-cursor-moving.gif)
+
+And just like in normal text editors, hit Enter will move the cursor to the new line, the start column of the last inserted text will be used as an anchor for the new line:
+
+![](_meta/text-enter-handling.gif)
+
+Well, that's it for today. See you in later updates.
+
 # Dec 14, 2021
 
 It turned out Druid didn't have built-in support for Image inside a Button, lol, so I need to build a custom `ImageButton` widget. Most of the implementations are copied from the built-in Button widget.

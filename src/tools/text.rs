@@ -30,6 +30,7 @@ impl ToolControl for TextTool {
         let row = (event.pos.y / cell_height) as usize;
         let col = (event.pos.x / cell_width) as usize;
         self.cursor_position = (row, col);
+        self.last_edit_position = Some(self.cursor_position);
         let i = row * cols + col;
         grid_list.highlight(i);
     }
