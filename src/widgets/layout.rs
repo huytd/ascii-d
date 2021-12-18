@@ -1,4 +1,4 @@
-use druid::{Data, Event, Widget, WidgetPod};
+use druid::{Data, Widget, WidgetPod};
 pub struct StackLayout<T>
 where
     T: Data,

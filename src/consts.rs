@@ -1,7 +1,5 @@
 use druid::Selector;
 
-use crate::tools::DrawingTools;
-
 pub const CHAR_HOR_L: char = '─';
 pub const CHAR_VER_L: char = '│';
 pub const CHAR_CORNER_TL_L: char = '┌';

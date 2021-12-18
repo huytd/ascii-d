@@ -2,7 +2,7 @@ use crate::{
     data::GridList,
     shapes::{
         line::{LineDirection, LineShape},
-        ShapeList, ShapeRender,
+        ShapeList,
     },
 };
 
@@ -60,17 +60,17 @@ impl ToolControl for LineTool {
 
     fn end(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut ShapeList,
-        grid_list: &mut GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut ShapeList,
+        _grid_list: &mut GridList,
     ) {
     }
 
     fn input(
         &mut self,
-        event: &druid::KeyEvent,
-        shape_list: &mut ShapeList,
-        grid_list: &mut GridList,
+        _event: &druid::KeyEvent,
+        _shape_list: &mut ShapeList,
+        _grid_list: &mut GridList,
     ) {
     }
 }

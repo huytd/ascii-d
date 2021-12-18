@@ -11,39 +11,39 @@ impl EraserTool {
 impl ToolControl for EraserTool {
     fn start(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 
     fn draw(
         &mut self,
         event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
+        _shape_list: &mut crate::shapes::ShapeList,
         grid_list: &mut crate::data::GridList,
     ) {
         let (cell_width, cell_height) = grid_list.cell_size;
         let row = (event.pos.y / cell_height) as usize;
         let col = (event.pos.x / cell_width) as usize;
-        let (rows, cols) = grid_list.grid_size;
+        let (_rows, cols) = grid_list.grid_size;
         let i = row * cols + col;
         grid_list.get(i).clear();
     }
 
     fn input(
         &mut self,
-        event: &druid::KeyEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::KeyEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 
     fn end(
         &mut self,
-        event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut crate::data::GridList,
     ) {
     }
 }

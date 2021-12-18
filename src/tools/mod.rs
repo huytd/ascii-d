@@ -1,10 +1,9 @@
 use std::{
-    cell,
     fmt::Display,
     ops::{Index, IndexMut},
 };
 
-use druid::{keyboard_types::KeyboardEvent, Data, Event, KeyEvent, MouseEvent};
+use druid::{Data, KeyEvent, MouseEvent};
 
 use crate::{
     data::GridList,
@@ -80,10 +79,6 @@ impl ToolManager {
 
     pub fn set_tool(&mut self, tool: DrawingTools) {
         self.current = tool;
-    }
-
-    pub fn get_active_tool(&self) -> DrawingTools {
-        return self.current;
     }
 }
 
