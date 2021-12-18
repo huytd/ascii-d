@@ -85,6 +85,52 @@ Getting back to this project after a month-long break, at first, it seemed like 
 
 I decided to change the UI from dark theme to light. Now that the basic functionalities are ready, it's time to focus more on the UI. The next update will be about the toolbar.
 
+# Nov 2, 2021
+
+The idea is, each drawable shape (line, rectangle, arrow,...) will have
+its own Tool object, and there is a ToolManager to manage them all, pass
+the current mouse input from the grid into the active tool.
+
+The list of the available tools should be fixed and pre-allocated at
+compile time. But it can be dynamic too, just not something to worry about
+at this moment.
+
+Each tool will implement the `ToolControl` trait, which defined the three
+stages of each drawing behavior:
+
+- start(): called when the user started drawing
+- draw(): called when the user is drawing with their mouse down
+- end(): called when the user finished drawing, with their mouse up
+
+Each stage could modify the data buffer directly.
+
+```
+               ┌──────────────┐
+ MouseDown────▶│              ├─────▶start()
+ MouseMove────▶│ ToolManager  ├─────▶draw()
+   MouseUp────▶│┌────────────┐├─────▶end()
+               └┤Active Tool ├┘
+                └────────────┘
+```
+
+The first tool in this commit is `LineTool`, to draw a straight line between
+the start and current mouse position.
+
+# Nov 1, 2021
+
+Well, there are a lot going on in this commit. The app now render
+things like background grid or other content based on the visible
+area only, not the whole canvas.
+
+The second thing is some early PoC for a reusable character layout,
+previously, we use grid_text to render the whole data buffer to the
+screen, it requires a lot of text layout update, rebuild, clone the
+screen buffer into a new string on EVERY FUCKING MOUSE MOVE! With the
+new approach, all box drawing characters which will be rendered on the
+screen will be pre-built and never be built again during runtime.
+
+More on the next commit.
+
 # Oct 21, 2021
 
 Before the current version, I’ve been trying to prototype ASCII-d using different languages/tech stack, one of them is the obvious choice: Electron. Just to get a glimpse of how my idea looks in action.
