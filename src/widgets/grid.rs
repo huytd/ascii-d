@@ -1,8 +1,8 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontDescriptor, FontWeight, LifeCycleCtx,
-    Point, Rect, RenderContext, Size, TextLayout, Widget,
+    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
+    LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
@@ -28,8 +28,8 @@ pub struct CanvasGrid {
 }
 impl CanvasGrid {
     pub fn new(ctx: &mut LifeCycleCtx) -> Self {
-        let monospace_font = ctx.text().load_font(FONT).unwrap();
-        let font = FontDescriptor::new(monospace_font.clone())
+        let monospace_font = ctx.text().load_font(FONT);
+        let font = FontDescriptor::new(monospace_font.unwrap_or(FontFamily::MONOSPACE))
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();

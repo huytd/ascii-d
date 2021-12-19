@@ -5,5 +5,10 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 druid = { git = "https://github.com/linebender/druid", features = ["image", "png"] }
+wasm-bindgen = "0.2.67"
+console_error_panic_hook = "0.1.6"

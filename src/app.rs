@@ -3,14 +3,8 @@ use druid::{
     AppLauncher, LifeCycle, PlatformError, Widget, WidgetPod, WindowDesc,
 };
 
-mod consts;
-mod data;
-mod shapes;
-mod tools;
-mod widgets;
-
-use data::ApplicationState;
-use widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget};
+use crate::data::ApplicationState;
+use crate::widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget};
 
 struct MainWindow {
     content: WidgetPod<ApplicationState, Box<dyn Widget<ApplicationState>>>,
@@ -77,12 +71,12 @@ impl Widget<ApplicationState> for MainWindow {
     }
 }
 
-fn main() -> Result<(), PlatformError> {
+pub fn start_app() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(WindowDesc::new(MainWindow::new()).title("ASCII-d"));
     app.launch(ApplicationState {
-        mode: tools::DrawingTools::Select,
+        mode: crate::tools::DrawingTools::Select,
     })?;
     Ok(())
 }

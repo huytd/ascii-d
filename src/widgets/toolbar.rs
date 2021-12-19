@@ -1,7 +1,7 @@
 use super::image_button::ImageButton;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
-    widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
+    widget::{Button, CrossAxisAlignment, Flex, MainAxisAlignment},
     Color, Event, ImageBuf, Point, Rect, RenderContext, Size, Widget, WidgetPod,
 };
 
@@ -17,14 +17,70 @@ impl ToolBarWidget {
         let text_icon = ImageBuf::from_data(include_bytes!("../../assets/text-icon.png")).unwrap();
         let eraser_icon =
             ImageBuf::from_data(include_bytes!("../../assets/eraser-icon.png")).unwrap();
+        // let pod = WidgetPod::new(
+        //     Flex::row()
+        //         .with_child(
+        //             ImageButton::new(
+        //                 select_icon,
+        //                 Size::new(26.0, 26.0),
+        //                 DrawingTools::Select.to_string(),
+        //             )
+        //             .on_click(|ctx, data: &mut ApplicationState, _env| {
+        //                 let tool = DrawingTools::Select;
+        //                 data.mode = tool;
+        //                 ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
+        //                 ctx.set_handled();
+        //             }),
+        //         )
+        //         .with_spacer(4.0)
+        //         .with_child(
+        //             ImageButton::new(
+        //                 line_icon,
+        //                 Size::new(26.0, 26.0),
+        //                 DrawingTools::Line.to_string(),
+        //             )
+        //             .on_click(|ctx, data: &mut ApplicationState, _env| {
+        //                 let tool = DrawingTools::Line;
+        //                 data.mode = tool;
+        //                 ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
+        //                 ctx.set_handled();
+        //             }),
+        //         )
+        //         .with_spacer(4.0)
+        //         .with_child(
+        //             ImageButton::new(
+        //                 text_icon,
+        //                 Size::new(26.0, 26.0),
+        //                 DrawingTools::Text.to_string(),
+        //             )
+        //             .on_click(|ctx, data: &mut ApplicationState, _env| {
+        //                 let tool = DrawingTools::Text;
+        //                 data.mode = tool;
+        //                 ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
+        //                 ctx.set_handled();
+        //             }),
+        //         )
+        //         .with_spacer(4.0)
+        //         .with_child(
+        //             ImageButton::new(
+        //                 eraser_icon,
+        //                 Size::new(26.0, 26.0),
+        //                 DrawingTools::Eraser.to_string(),
+        //             )
+        //             .on_click(|ctx, data: &mut ApplicationState, _env| {
+        //                 let tool = DrawingTools::Eraser;
+        //                 data.mode = tool;
+        //                 ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
+        //                 ctx.set_handled();
+        //             }),
+        //         )
+        //         .cross_axis_alignment(CrossAxisAlignment::Start)
+        //         .main_axis_alignment(MainAxisAlignment::Start),
+        // );
         let pod = WidgetPod::new(
             Flex::row()
                 .with_child(
-                    ImageButton::new(
-                        select_icon,
-                        Size::new(26.0, 26.0),
-                        DrawingTools::Select.to_string(),
-                    )
+                    Button::new("A")
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Select;
                         data.mode = tool;
@@ -34,11 +90,7 @@ impl ToolBarWidget {
                 )
                 .with_spacer(4.0)
                 .with_child(
-                    ImageButton::new(
-                        line_icon,
-                        Size::new(26.0, 26.0),
-                        DrawingTools::Line.to_string(),
-                    )
+                    Button::new("B")
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Line;
                         data.mode = tool;
@@ -48,11 +100,7 @@ impl ToolBarWidget {
                 )
                 .with_spacer(4.0)
                 .with_child(
-                    ImageButton::new(
-                        text_icon,
-                        Size::new(26.0, 26.0),
-                        DrawingTools::Text.to_string(),
-                    )
+                    Button::new("C")
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Text;
                         data.mode = tool;
@@ -62,11 +110,7 @@ impl ToolBarWidget {
                 )
                 .with_spacer(4.0)
                 .with_child(
-                    ImageButton::new(
-                        eraser_icon,
-                        Size::new(26.0, 26.0),
-                        DrawingTools::Eraser.to_string(),
-                    )
+                    Button::new("D")
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Eraser;
                         data.mode = tool;
@@ -74,9 +118,10 @@ impl ToolBarWidget {
                         ctx.set_handled();
                     }),
                 )
-                .cross_axis_alignment(CrossAxisAlignment::Start)
-                .main_axis_alignment(MainAxisAlignment::Start),
+                // .cross_axis_alignment(CrossAxisAlignment::Start)
+                // .main_axis_alignment(MainAxisAlignment::Start),
         );
+
         ToolBarWidget { buttons: pod }
     }
 }
