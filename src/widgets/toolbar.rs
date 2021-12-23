@@ -164,9 +164,10 @@ impl Widget<ApplicationState> for ToolBarWidget {
         env: &druid::Env,
     ) -> Size {
         let size = ctx.window().get_size();
+        let margin = Size::new(26.0, 53.0 - 4.0);
         self.buttons.layout(ctx, bc, data, env);
         self.buttons
-            .set_origin(ctx, data, env, Point::new(26.0, size.height - 75.0));
+            .set_origin(ctx, data, env, Point::new(margin.width, size.height - margin.height));
         Size {
             width: 100.0,
             height: 26.0,

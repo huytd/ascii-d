@@ -1,7 +1,7 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontDescriptor, FontWeight, LifeCycleCtx,
+    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontFamily, FontDescriptor, FontWeight, LifeCycleCtx,
     Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
@@ -28,7 +28,7 @@ pub struct CanvasGrid {
 }
 impl CanvasGrid {
     pub fn new(ctx: &mut LifeCycleCtx) -> Self {
-        let monospace_font = ctx.text().load_font(FONT).unwrap();
+        let monospace_font = ctx.text().load_font(FONT).unwrap_or(FontFamily::MONOSPACE);
         let font = FontDescriptor::new(monospace_font.clone())
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
