@@ -6,7 +6,7 @@ Drawing Tools
 - [x] Text
 - [x] Text Advanced - Keyboard movement
 - [x] Eraser
-- [ ] Shape Drawing - Rectangle
+- [x] Shape Drawing - Rectangle
 - [ ] Eraser Advanced - Shape-based eraser
 - [ ] Free-hand drawing with assists
 

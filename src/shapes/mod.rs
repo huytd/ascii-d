@@ -3,6 +3,7 @@ use std::any::Any;
 use crate::data::GridList;
 
 pub mod line;
+pub mod rect;
 
 pub trait ShapeRender {
     fn draw(&mut self, grid_buffer: &mut GridList);

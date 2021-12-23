@@ -1,3 +1,58 @@
+# Dec 22, 2021
+
+Today I implemented another shape drawing feature, Rectangle Tool (or `RectTool`)! Now we can draw boxes everywhere.
+
+![](_meta/rect-tool.png)
+
+The way `RectTool` works is pretty much like `LineTool`. A new `RectShape` will be created when the tool starts. When the user drags their mouse, the end point of the `RectShape` will be recorded.
+
+Let's call the four corners of the rectangle as A, B, C, and D. There are 4 cases that could happen when the user draw:
+
+```
+ A                         B
+ (sx, sy)------------------+
+ |                         |  (Draw from A -> D)
+ |                         |
+ +------------------(ex, ey)
+ C                         D
+
+
+ A                         B
+ (ex, ey)------------------+
+ |                         |  (Draw from D -> A)
+ |                         |
+ +------------------(sx, sy)
+ C                         D
+
+
+ A                         B
+ +------------------(sx, sy)
+ |                         |  (Draw from B -> C)
+ |                         |
+ (ex, ey)------------------+
+ C                         D
+
+
+ A                         B
+ +------------------(ex, ey)
+ |                         |  (Draw from C -> B)
+ |                         |
+ (sx, sy)------------------+
+ C                         D
+```
+
+Whatever case it is, to draw a rectangle on the main grid, we need to draw from left to right, top to bottom, so, here's how I find the top-left and bottom-right points for drawing:
+
+```
+from_x = Min(sx, ex)
+from_y = Min(sy, ey)
+to_x = Max(sx, ex)
+to_y = Max(sy, ey)
+```
+
+Now, what needs to be done is draw the four lines: AB, CD, AC, and BD.
+
+
 # Dec 17, 2021
 
 Okayyy, I finally make the text editing experience feels better. By changing a lot in the `TextTool`. But let's take a step back and review what was the issue with the initial implementation.

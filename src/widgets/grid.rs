@@ -151,6 +151,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             match data.mode {
                 DrawingTools::Select => ctx.set_cursor(&Cursor::Arrow),
                 DrawingTools::Line => ctx.set_cursor(&Cursor::Crosshair),
+                DrawingTools::Rect => ctx.set_cursor(&Cursor::Crosshair),
                 DrawingTools::Text => ctx.set_cursor(&Cursor::IBeam),
                 DrawingTools::Eraser => ctx.set_cursor(&Cursor::Crosshair),
             }

@@ -11,10 +11,11 @@ use crate::{
     tools::{line::LineTool, text::TextTool},
 };
 
-use self::{eraser::EraserTool, select::SelectTool};
+use self::{eraser::EraserTool, rect::RectTool, select::SelectTool};
 
 pub mod eraser;
 pub mod line;
+pub mod rect;
 pub mod select;
 pub mod text;
 
@@ -24,6 +25,7 @@ pub enum DrawingTools {
     Line = 1,
     Text = 2,
     Eraser = 3,
+    Rect = 4,
 }
 
 impl Display for DrawingTools {
@@ -33,6 +35,7 @@ impl Display for DrawingTools {
             DrawingTools::Line => "LINE",
             DrawingTools::Text => "TEXT",
             DrawingTools::Eraser => "ERASER",
+            DrawingTools::Rect => "RECTANGLE",
         };
         write!(f, "{}", op)
     }
@@ -72,6 +75,7 @@ impl ToolManager {
                 Box::new(LineTool::new()),
                 Box::new(TextTool::new()),
                 Box::new(EraserTool::new()),
+                Box::new(RectTool::new()),
             ],
             current: DrawingTools::Select,
         }

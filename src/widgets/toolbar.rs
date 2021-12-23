@@ -15,6 +15,7 @@ impl ToolBarWidget {
             ImageBuf::from_data(include_bytes!("../../assets/select-icon.png")).unwrap();
         let line_icon = ImageBuf::from_data(include_bytes!("../../assets/line-icon.png")).unwrap();
         let text_icon = ImageBuf::from_data(include_bytes!("../../assets/text-icon.png")).unwrap();
+        let rect_icon = ImageBuf::from_data(include_bytes!("../../assets/rect-icon.png")).unwrap();
         let eraser_icon =
             ImageBuf::from_data(include_bytes!("../../assets/eraser-icon.png")).unwrap();
         let pod = WidgetPod::new(
@@ -41,6 +42,20 @@ impl ToolBarWidget {
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
                         let tool = DrawingTools::Line;
+                        data.mode = tool;
+                        ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
+                        ctx.set_handled();
+                    }),
+                )
+                .with_spacer(4.0)
+                .with_child(
+                    ImageButton::new(
+                        rect_icon,
+                        Size::new(26.0, 26.0),
+                        DrawingTools::Rect.to_string(),
+                    )
+                    .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let tool = DrawingTools::Rect;
                         data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
