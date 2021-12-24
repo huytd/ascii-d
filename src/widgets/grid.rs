@@ -7,7 +7,12 @@ use druid::{
 
 use crate::{
     consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
-    data::{grid_cell::GridCell, grid_list::GridList, selection::SelectionRange, ApplicationState},
+    data::{
+        grid_cell::GridCell,
+        grid_list::{self, GridList},
+        selection::SelectionRange,
+        ApplicationState,
+    },
     shapes::ShapeList,
     tools::{DrawingTools, ToolControl, ToolManager},
 };
@@ -133,7 +138,15 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if cmd.get(SELECTION_END_COMMAND).is_some() {
                     if let Some(rect) = self.selection_range.as_rect() {
                         // Start searching for selected shapes
-                        println!("LOOKING FOR SHAPES IN {:?}", rect);
+                        let matched = self
+                            .shape_list
+                            .find_shape_in_rect(rect, &mut self.grid_list);
+
+                        for shape in matched {
+                            let i = shape.start.0 * self.grid_list.grid_size.1 + shape.start.1;
+                            // TODO: Do something with the selected here
+                            self.grid_list.get(i).highlight();
+                        }
                     }
                     self.selection_range.discard();
                 }
