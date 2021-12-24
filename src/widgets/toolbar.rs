@@ -2,7 +2,7 @@ use super::image_button::ImageButton;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
     widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
-    Color, Event, ImageBuf, Point, Rect, RenderContext, Size, Widget, WidgetPod,
+    Color, Event, ImageBuf, Point, Rect, RenderContext, Size, Vec2, Widget, WidgetPod,
 };
 
 pub struct ToolBarWidget {
@@ -89,7 +89,7 @@ impl ToolBarWidget {
                         ctx.set_handled();
                     }),
                 )
-                .cross_axis_alignment(CrossAxisAlignment::Start)
+                .cross_axis_alignment(CrossAxisAlignment::End)
                 .main_axis_alignment(MainAxisAlignment::Start),
         );
         ToolBarWidget { buttons: pod }
@@ -163,11 +163,9 @@ impl Widget<ApplicationState> for ToolBarWidget {
         data: &ApplicationState,
         env: &druid::Env,
     ) -> Size {
-        let size = ctx.window().get_size();
-        let margin = Size::new(26.0, 53.0 - 4.0);
         self.buttons.layout(ctx, bc, data, env);
         self.buttons
-            .set_origin(ctx, data, env, Point::new(margin.width, size.height - margin.height));
+            .set_origin(ctx, data, env, Point::new(26.0, -26.0 + 4.0));
         Size {
             width: 100.0,
             height: 26.0,

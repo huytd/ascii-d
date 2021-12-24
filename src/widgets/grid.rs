@@ -1,8 +1,8 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontFamily, FontDescriptor, FontWeight, LifeCycleCtx,
-    Point, Rect, RenderContext, Size, TextLayout, Widget,
+    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
+    LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
