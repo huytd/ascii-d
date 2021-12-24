@@ -2,17 +2,12 @@ use std::usize;
 
 use druid::{
     kurbo::Line, piet::Text, theme, Code, Color, Cursor, Event, FontDescriptor, FontFamily,
-    FontWeight, LensExt, LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
+    FontWeight, LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
     consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
-    data::{
-        grid_cell::GridCell,
-        grid_list::{self, GridList},
-        selection::SelectionRange,
-        ApplicationState,
-    },
+    data::{grid_cell::GridCell, grid_list::GridList, selection::SelectionRange, ApplicationState},
     shapes::ShapeList,
     tools::{DrawingTools, ToolControl, ToolManager},
 };

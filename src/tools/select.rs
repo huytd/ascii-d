@@ -1,4 +1,4 @@
-use druid::{EventCtx, Point};
+use druid::EventCtx;
 
 use crate::{
     consts::{SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
@@ -38,7 +38,7 @@ impl ToolControl for SelectTool {
 
     fn input(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
         _shape_list: &mut crate::shapes::ShapeList,
         _grid_list: &mut GridList,

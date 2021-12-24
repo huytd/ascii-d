@@ -2,7 +2,7 @@ use std::any::Any;
 
 use druid::{Point, Rect};
 
-use crate::data::{grid_cell::GridCell, grid_list::GridList};
+use crate::data::grid_list::GridList;
 
 use self::rect::RectShape;
 

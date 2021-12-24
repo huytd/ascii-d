@@ -15,7 +15,7 @@ impl EraserTool {
 impl ToolControl for EraserTool {
     fn start(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
         _grid_list: &mut GridList,
@@ -24,7 +24,7 @@ impl ToolControl for EraserTool {
 
     fn draw(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
         grid_list: &mut GridList,
@@ -39,7 +39,7 @@ impl ToolControl for EraserTool {
 
     fn input(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
         _shape_list: &mut crate::shapes::ShapeList,
         _grid_list: &mut GridList,
@@ -48,7 +48,7 @@ impl ToolControl for EraserTool {
 
     fn end(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
         _grid_list: &mut GridList,

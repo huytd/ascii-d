@@ -15,7 +15,7 @@ impl RectTool {
 impl ToolControl for RectTool {
     fn start(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         shape_list: &mut crate::shapes::ShapeList,
         grid_list: &mut GridList,
@@ -28,7 +28,7 @@ impl ToolControl for RectTool {
 
     fn draw(
         &mut self,
-        ctx: &mut EventCtx,
+        _ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         shape_list: &mut crate::shapes::ShapeList,
         grid_list: &mut GridList,
@@ -46,19 +46,19 @@ impl ToolControl for RectTool {
 
     fn input(
         &mut self,
-        ctx: &mut EventCtx,
-        event: &druid::KeyEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut GridList,
+        _ctx: &mut EventCtx,
+        _event: &druid::KeyEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut GridList,
     ) {
     }
 
     fn end(
         &mut self,
-        ctx: &mut EventCtx,
-        event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut GridList,
+        _ctx: &mut EventCtx,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut crate::shapes::ShapeList,
+        _grid_list: &mut GridList,
     ) {
     }
 }
