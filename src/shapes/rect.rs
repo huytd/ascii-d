@@ -1,5 +1,9 @@
-use crate::consts::{
-    CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_L, CHAR_VER_L,
+use crate::{
+    consts::{
+        CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_L,
+        CHAR_VER_L,
+    },
+    data::grid_list::GridList,
 };
 
 use super::{Shape, ShapeRender};
@@ -24,7 +28,7 @@ impl RectShape {
 impl Shape for RectShape {}
 
 impl ShapeRender for RectShape {
-    fn draw(&mut self, grid_buffer: &mut crate::data::GridList) {
+    fn draw(&mut self, grid_buffer: &mut GridList) {
         let (_rows, cols) = grid_buffer.grid_size;
         let (f_row, f_col) = self.start;
         let (t_row, t_col) = self.end;
@@ -63,7 +67,7 @@ impl ShapeRender for RectShape {
         grid_buffer.get(bottom_left).set_preview(CHAR_CORNER_BL_L);
     }
 
-    fn commit(&mut self, grid_buffer: &mut crate::data::GridList) {
+    fn commit(&mut self, grid_buffer: &mut GridList) {
         grid_buffer.commit_all();
         self.preview = false;
     }

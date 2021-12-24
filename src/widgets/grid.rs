@@ -1,13 +1,13 @@
 use std::usize;
 
 use druid::{
-    kurbo::Line, piet::Text, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
-    LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
+    kurbo::Line, piet::Text, theme, Code, Color, Cursor, Event, FontDescriptor, FontFamily,
+    FontWeight, LensExt, LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
-    consts::CANVAS_SIZE,
-    data::{ApplicationState, GridCell, GridList},
+    consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
+    data::{grid_cell::GridCell, grid_list::GridList, selection::SelectionRange, ApplicationState},
     shapes::ShapeList,
     tools::{DrawingTools, ToolControl, ToolManager},
 };
@@ -23,6 +23,7 @@ pub struct CanvasGrid {
     letterbox: TextLayout<String>,
     grid_text: TextLayout<String>,
     mouse_position: (usize, usize),
+    selection_range: SelectionRange,
     is_mouse_down: bool,
     tool_manager: ToolManager,
 }
@@ -47,6 +48,7 @@ impl CanvasGrid {
             mouse_position: (0, 0),
             is_mouse_down: false,
             tool_manager: ToolManager::new(),
+            selection_range: SelectionRange::new(),
             letterbox,
             grid_text,
         }
@@ -90,7 +92,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                     _ => {}
                 }
                 self.tool_manager
-                    .input(event, &mut self.shape_list, &mut self.grid_list);
+                    .input(ctx, event, &mut self.shape_list, &mut self.grid_list);
                 ctx.request_update();
             }
             Event::MouseMove(event) => {
@@ -99,8 +101,12 @@ impl Widget<ApplicationState> for CanvasGrid {
                     let mouse_col = (event.pos.x / cell_width) as usize;
                     self.mouse_position = (mouse_row, mouse_col);
                     if self.is_mouse_down {
-                        self.tool_manager
-                            .draw(event, &mut self.shape_list, &mut self.grid_list);
+                        self.tool_manager.draw(
+                            ctx,
+                            event,
+                            &mut self.shape_list,
+                            &mut self.grid_list,
+                        );
                     }
                     ctx.request_update();
                 }
@@ -108,14 +114,29 @@ impl Widget<ApplicationState> for CanvasGrid {
             Event::MouseDown(event) => {
                 self.is_mouse_down = true;
                 self.tool_manager
-                    .start(event, &mut self.shape_list, &mut self.grid_list);
+                    .start(ctx, event, &mut self.shape_list, &mut self.grid_list);
             }
             Event::MouseUp(event) => {
                 self.is_mouse_down = false;
                 self.tool_manager
-                    .end(event, &mut self.shape_list, &mut self.grid_list);
+                    .end(ctx, event, &mut self.shape_list, &mut self.grid_list);
                 self.shape_list.commit(&mut self.grid_list);
                 ctx.request_update();
+            }
+            Event::Command(cmd) => {
+                if let Some(point) = cmd.get(SELECTION_START_COMMAND) {
+                    self.selection_range.set_start(*point);
+                }
+                if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
+                    self.selection_range.set_end(*point);
+                }
+                if cmd.get(SELECTION_END_COMMAND).is_some() {
+                    if let Some(rect) = self.selection_range.as_rect() {
+                        // Start searching for selected shapes
+                        println!("LOOKING FOR SHAPES IN {:?}", rect);
+                    }
+                    self.selection_range.discard();
+                }
             }
             _ => {}
         }
@@ -186,6 +207,8 @@ impl Widget<ApplicationState> for CanvasGrid {
             ctx.fill(bound, &brush);
             let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
             let cursor_brush = ctx.solid_brush(Color::RED);
+            let primary_color = env.get(theme::PRIMARY_LIGHT);
+            let selection_brush = ctx.solid_brush(primary_color.with_alpha(0.5));
 
             if let Some((cell_width, cell_height)) = self.cell_size {
                 let start = (
@@ -199,7 +222,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 let cols = (self.width / cell_width) as usize;
                 let _rows = (self.height / cell_height) as usize;
 
-                for row in (start.1)..(end.1) {
+                for row in (start.1)..=(end.1) {
                     let row = row as f64;
                     let line = Line::new(
                         Point::new(bound.x0, row * cell_height),
@@ -207,7 +230,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                     );
                     ctx.stroke(line, &grid_brush, 1.0);
                 }
-                for col in (start.0)..(end.0) {
+                for col in (start.0)..=(end.0) {
                     let col = col as f64;
                     let line = Line::new(
                         Point::new(col * cell_width, bound.y0),
@@ -247,6 +270,10 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }
                     }
+                }
+
+                if let Some(rect) = self.selection_range.as_rect() {
+                    ctx.fill(rect, &selection_brush);
                 }
             }
         });

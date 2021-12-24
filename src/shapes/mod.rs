@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use crate::data::GridList;
+use crate::data::grid_list::GridList;
 
 pub mod line;
 pub mod rect;

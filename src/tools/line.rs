@@ -1,5 +1,7 @@
+use druid::EventCtx;
+
 use crate::{
-    data::GridList,
+    data::grid_list::GridList,
     shapes::{
         line::{LineDirection, LineShape},
         ShapeList,
@@ -19,6 +21,7 @@ impl LineTool {
 impl ToolControl for LineTool {
     fn start(
         &mut self,
+        ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
@@ -31,6 +34,7 @@ impl ToolControl for LineTool {
 
     fn draw(
         &mut self,
+        ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
@@ -60,6 +64,7 @@ impl ToolControl for LineTool {
 
     fn end(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
@@ -68,6 +73,7 @@ impl ToolControl for LineTool {
 
     fn input(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
         _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,

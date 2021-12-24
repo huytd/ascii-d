@@ -1,3 +1,7 @@
+use druid::EventCtx;
+
+use crate::data::grid_list::GridList;
+
 use super::ToolControl;
 
 pub struct EraserTool;
@@ -11,17 +15,19 @@ impl EraserTool {
 impl ToolControl for EraserTool {
     fn start(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
     }
 
     fn draw(
         &mut self,
+        ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        grid_list: &mut crate::data::GridList,
+        grid_list: &mut GridList,
     ) {
         let (cell_width, cell_height) = grid_list.cell_size;
         let row = (event.pos.y / cell_height) as usize;
@@ -33,17 +39,19 @@ impl ToolControl for EraserTool {
 
     fn input(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
     }
 
     fn end(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
     }
 }

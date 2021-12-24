@@ -1,3 +1,10 @@
+use druid::{EventCtx, Point};
+
+use crate::{
+    consts::{SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
+    data::grid_list::GridList,
+};
+
 use super::ToolControl;
 
 pub struct SelectTool;
@@ -11,33 +18,40 @@ impl SelectTool {
 impl ToolControl for SelectTool {
     fn start(
         &mut self,
-        _event: &druid::MouseEvent,
+        ctx: &mut EventCtx,
+        event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
+        ctx.submit_command(SELECTION_START_COMMAND.with(event.pos));
     }
 
     fn draw(
         &mut self,
-        _event: &druid::MouseEvent,
+        ctx: &mut EventCtx,
+        event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
+        ctx.submit_command(SELECTION_MOVE_COMMAND.with(event.pos));
     }
 
     fn input(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
     }
 
     fn end(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut crate::shapes::ShapeList,
-        _grid_list: &mut crate::data::GridList,
+        _grid_list: &mut GridList,
     ) {
+        ctx.submit_command(SELECTION_END_COMMAND);
     }
 }

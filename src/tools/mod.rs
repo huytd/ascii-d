@@ -3,10 +3,10 @@ use std::{
     ops::{Index, IndexMut},
 };
 
-use druid::{Data, KeyEvent, MouseEvent};
+use druid::{Data, EventCtx, KeyEvent, MouseEvent};
 
 use crate::{
-    data::GridList,
+    data::grid_list::GridList,
     shapes::ShapeList,
     tools::{line::LineTool, text::TextTool},
 };
@@ -56,10 +56,34 @@ impl<T> IndexMut<DrawingTools> for Vec<T> {
 }
 
 pub trait ToolControl {
-    fn start(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
-    fn draw(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
-    fn input(&mut self, event: &KeyEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
-    fn end(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList);
+    fn start(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    );
+    fn draw(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    );
+    fn input(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &KeyEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    );
+    fn end(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    );
 }
 
 pub struct ToolManager {
@@ -87,19 +111,43 @@ impl ToolManager {
 }
 
 impl ToolControl for ToolManager {
-    fn start(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
-        self.available_tools[self.current].start(event, shape_list, grid_list);
+    fn start(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    ) {
+        self.available_tools[self.current].start(ctx, event, shape_list, grid_list);
     }
 
-    fn draw(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
-        self.available_tools[self.current].draw(event, shape_list, grid_list);
+    fn draw(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    ) {
+        self.available_tools[self.current].draw(ctx, event, shape_list, grid_list);
     }
 
-    fn end(&mut self, event: &MouseEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
-        self.available_tools[self.current].end(event, shape_list, grid_list);
+    fn input(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &KeyEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    ) {
+        self.available_tools[self.current].input(ctx, event, shape_list, grid_list);
     }
 
-    fn input(&mut self, event: &KeyEvent, shape_list: &mut ShapeList, grid_list: &mut GridList) {
-        self.available_tools[self.current].input(event, shape_list, grid_list);
+    fn end(
+        &mut self,
+        ctx: &mut EventCtx,
+        event: &MouseEvent,
+        shape_list: &mut ShapeList,
+        grid_list: &mut GridList,
+    ) {
+        self.available_tools[self.current].end(ctx, event, shape_list, grid_list);
     }
 }

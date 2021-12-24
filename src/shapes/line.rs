@@ -1,6 +1,9 @@
-use crate::consts::{
-    CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_DOWN_L,
-    CHAR_HOR_L, CHAR_HOR_UP_L, CHAR_SPACE, CHAR_VER_L, CHAR_VER_LEFT_L, CHAR_VER_RIGHT_L,
+use crate::{
+    consts::{
+        CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_DOWN_L,
+        CHAR_HOR_L, CHAR_HOR_UP_L, CHAR_SPACE, CHAR_VER_L, CHAR_VER_LEFT_L, CHAR_VER_RIGHT_L,
+    },
+    data::grid_list::GridList,
 };
 
 use super::{Shape, ShapeRender};
@@ -20,7 +23,7 @@ pub struct LineShape {
 }
 
 impl ShapeRender for LineShape {
-    fn draw(&mut self, grid_buffer: &mut crate::data::GridList) {
+    fn draw(&mut self, grid_buffer: &mut GridList) {
         let (_rows, cols) = grid_buffer.grid_size;
         let (from_row, from_col) = self.start;
         let (to_row, to_col) = self.end;
@@ -116,7 +119,7 @@ impl ShapeRender for LineShape {
         }
     }
 
-    fn commit(&mut self, grid_buffer: &mut crate::data::GridList) {
+    fn commit(&mut self, grid_buffer: &mut GridList) {
         grid_buffer.commit_all();
         self.preview = false;
     }

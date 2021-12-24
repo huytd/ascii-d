@@ -1,6 +1,6 @@
-use druid::KbKey;
+use druid::{EventCtx, KbKey};
 
-use crate::{data::GridList, shapes::ShapeList};
+use crate::{data::grid_list::GridList, shapes::ShapeList};
 
 use super::ToolControl;
 
@@ -21,6 +21,7 @@ impl TextTool {
 impl ToolControl for TextTool {
     fn start(
         &mut self,
+        ctx: &mut EventCtx,
         event: &druid::MouseEvent,
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
@@ -37,6 +38,7 @@ impl ToolControl for TextTool {
 
     fn draw(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut ShapeList,
         grid_list: &mut GridList,
@@ -45,6 +47,7 @@ impl ToolControl for TextTool {
 
     fn end(
         &mut self,
+        ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
         _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
@@ -53,6 +56,7 @@ impl ToolControl for TextTool {
 
     fn input(
         &mut self,
+        ctx: &mut EventCtx,
         event: &druid::KeyEvent,
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
