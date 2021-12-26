@@ -152,6 +152,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                             println!("SELECT SINGLE POINT {:?}", matched.get_points());
                         }
                     }
+                    // TODO: Visually highlight selected shapes, and make them movable
                     self.selection_range.discard();
                 }
             }
