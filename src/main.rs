@@ -3,6 +3,8 @@ use druid::{
     AppLauncher, LifeCycle, PlatformError, Widget, WidgetPod, WindowDesc,
 };
 
+#[macro_use]
+mod macros;
 mod consts;
 mod data;
 mod shapes;

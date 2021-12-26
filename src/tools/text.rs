@@ -1,6 +1,6 @@
 use druid::{EventCtx, KbKey};
 
-use crate::{data::grid_list::GridList, shapes::ShapeList};
+use crate::data::{grid_list::GridList, shape_list::ShapeList};
 
 use super::ToolControl;
 

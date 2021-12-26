@@ -7,8 +7,10 @@ use druid::{
 
 use crate::{
     consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
-    data::{grid_cell::GridCell, grid_list::GridList, selection::SelectionRange, ApplicationState},
-    shapes::ShapeList,
+    data::{
+        grid_cell::GridCell, grid_list::GridList, selection::SelectionRange, shape_list::ShapeList,
+        ApplicationState,
+    },
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
@@ -130,17 +132,24 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
                     self.selection_range.set_end(*point);
                 }
-                if cmd.get(SELECTION_END_COMMAND).is_some() {
+                if let Some(point) = cmd.get(SELECTION_END_COMMAND) {
                     if let Some(rect) = self.selection_range.as_rect() {
-                        // Start searching for selected shapes
+                        // Selected a range
                         let matched = self
                             .shape_list
                             .find_shape_in_rect(rect, &mut self.grid_list);
 
-                        for shape in matched {
-                            let i = shape.start.0 * self.grid_list.grid_size.1 + shape.start.1;
-                            // TODO: Do something with the selected here
-                            self.grid_list.get(i).highlight();
+                        println!(
+                            "FOUND {:?}",
+                            matched.iter().map(|s| s.get_points()).collect::<Vec<_>>()
+                        );
+                    } else {
+                        // Selected a single point
+                        if let Some(matched) = self
+                            .shape_list
+                            .find_shape_in_point(*point, &mut self.grid_list)
+                        {
+                            println!("SELECT SINGLE POINT {:?}", matched.get_points());
                         }
                     }
                     self.selection_range.discard();

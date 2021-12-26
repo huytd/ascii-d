@@ -1,3 +1,5 @@
+use druid::Point;
+
 use crate::{
     consts::{
         CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_L,
@@ -6,9 +8,8 @@ use crate::{
     data::grid_list::GridList,
 };
 
-use super::{Shape, ShapeRender};
+use super::ShapeRender;
 
-#[derive(Debug)]
 pub struct RectShape {
     pub start: (usize, usize),
     pub end: (usize, usize),
@@ -25,7 +26,7 @@ impl RectShape {
     }
 }
 
-impl Shape for RectShape {}
+impl_shape_for!(RectShape);
 
 impl ShapeRender for RectShape {
     fn draw(&mut self, grid_buffer: &mut GridList) {
@@ -78,13 +79,5 @@ impl ShapeRender for RectShape {
 
     fn is_manual_commit(&self) -> bool {
         false
-    }
-
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-        self
     }
 }

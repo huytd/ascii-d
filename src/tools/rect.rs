@@ -1,6 +1,9 @@
 use druid::EventCtx;
 
-use crate::{data::grid_list::GridList, shapes::rect::RectShape};
+use crate::{
+    data::{grid_list::GridList, shape_list::ShapeList},
+    shapes::rect::RectShape,
+};
 
 use super::ToolControl;
 
@@ -17,7 +20,7 @@ impl ToolControl for RectTool {
         &mut self,
         _ctx: &mut EventCtx,
         event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
+        shape_list: &mut ShapeList,
         grid_list: &mut GridList,
     ) {
         let (cell_width, cell_height) = grid_list.cell_size;
@@ -30,7 +33,7 @@ impl ToolControl for RectTool {
         &mut self,
         _ctx: &mut EventCtx,
         event: &druid::MouseEvent,
-        shape_list: &mut crate::shapes::ShapeList,
+        shape_list: &mut ShapeList,
         grid_list: &mut GridList,
     ) {
         if let Some(rect) = shape_list.data.last_mut() {
@@ -48,7 +51,7 @@ impl ToolControl for RectTool {
         &mut self,
         _ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
-        _shape_list: &mut crate::shapes::ShapeList,
+        _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
     }
@@ -57,7 +60,7 @@ impl ToolControl for RectTool {
         &mut self,
         _ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
-        _shape_list: &mut crate::shapes::ShapeList,
+        _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
     }

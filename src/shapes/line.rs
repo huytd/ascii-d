@@ -1,3 +1,5 @@
+use druid::Point;
+
 use crate::{
     consts::{
         CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_DOWN_L,
@@ -6,21 +8,21 @@ use crate::{
     data::grid_list::GridList,
 };
 
-use super::{Shape, ShapeRender};
+use super::ShapeRender;
 
-#[derive(Debug)]
 pub enum LineDirection {
     Horizontal,
     Vertical,
 }
 
-#[derive(Debug)]
 pub struct LineShape {
     pub start: (usize, usize),
     pub end: (usize, usize),
     pub direction: LineDirection,
     pub preview: bool,
 }
+
+impl_shape_for!(LineShape);
 
 impl ShapeRender for LineShape {
     fn draw(&mut self, grid_buffer: &mut GridList) {
@@ -128,20 +130,10 @@ impl ShapeRender for LineShape {
         self.preview
     }
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-        self
-    }
-
     fn is_manual_commit(&self) -> bool {
         false
     }
 }
-
-impl Shape for LineShape {}
 
 impl LineShape {
     pub fn new(row: usize, col: usize) -> Self {

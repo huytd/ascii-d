@@ -6,8 +6,7 @@ use std::{
 use druid::{Data, EventCtx, KeyEvent, MouseEvent};
 
 use crate::{
-    data::grid_list::GridList,
-    shapes::ShapeList,
+    data::{grid_list::GridList, shape_list::ShapeList},
     tools::{line::LineTool, text::TextTool},
 };
 

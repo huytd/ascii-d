@@ -1,11 +1,8 @@
 use druid::EventCtx;
 
 use crate::{
-    data::grid_list::GridList,
-    shapes::{
-        line::{LineDirection, LineShape},
-        ShapeList,
-    },
+    data::{grid_list::GridList, shape_list::ShapeList},
+    shapes::line::{LineDirection, LineShape},
 };
 
 use super::ToolControl;

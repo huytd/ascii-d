@@ -2,7 +2,7 @@ use druid::EventCtx;
 
 use crate::{
     consts::{SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
-    data::grid_list::GridList,
+    data::{grid_list::GridList, shape_list::ShapeList},
 };
 
 use super::ToolControl;
@@ -20,7 +20,7 @@ impl ToolControl for SelectTool {
         &mut self,
         ctx: &mut EventCtx,
         event: &druid::MouseEvent,
-        _shape_list: &mut crate::shapes::ShapeList,
+        _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
         ctx.submit_command(SELECTION_START_COMMAND.with(event.pos));
@@ -30,7 +30,7 @@ impl ToolControl for SelectTool {
         &mut self,
         ctx: &mut EventCtx,
         event: &druid::MouseEvent,
-        _shape_list: &mut crate::shapes::ShapeList,
+        _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
         ctx.submit_command(SELECTION_MOVE_COMMAND.with(event.pos));
@@ -40,7 +40,7 @@ impl ToolControl for SelectTool {
         &mut self,
         _ctx: &mut EventCtx,
         _event: &druid::KeyEvent,
-        _shape_list: &mut crate::shapes::ShapeList,
+        _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
     }
@@ -48,10 +48,10 @@ impl ToolControl for SelectTool {
     fn end(
         &mut self,
         ctx: &mut EventCtx,
-        _event: &druid::MouseEvent,
-        _shape_list: &mut crate::shapes::ShapeList,
+        event: &druid::MouseEvent,
+        _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
-        ctx.submit_command(SELECTION_END_COMMAND);
+        ctx.submit_command(SELECTION_END_COMMAND.with(event.pos));
     }
 }
