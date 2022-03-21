@@ -1,6 +1,7 @@
 use druid::{
     widget::{Scroll, SizedBox},
-    AppLauncher, LifeCycle, PlatformError, Widget, WidgetPod, WindowDesc,
+    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Event, Handled, LifeCycle,
+    PlatformError, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
 
 #[macro_use]
@@ -79,11 +80,26 @@ impl Widget<ApplicationState> for MainWindow {
     }
 }
 
+struct Delegate;
+
+impl AppDelegate<ApplicationState> for Delegate {
+    fn window_removed(
+        &mut self,
+        id: WindowId,
+        data: &mut ApplicationState,
+        env: &Env,
+        ctx: &mut DelegateCtx,
+    ) {
+        // Quit when the window is closed
+        Application::global().quit();
+    }
+}
+
 fn main() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(WindowDesc::new(MainWindow::new()).title("ASCII-d"));
-    app.launch(ApplicationState {
+    app.delegate(Delegate {}).launch(ApplicationState {
         mode: tools::DrawingTools::Select,
     })?;
     Ok(())
