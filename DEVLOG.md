@@ -1,3 +1,11 @@
+# Mar 20, 2022
+
+I don't know why did I wait for so long to implement this.
+
+Before, if the window is closed, the app keeps running. Druid intentionally implements this behavior to support multiple windows applications. ASCII-d is not designed to be a multi-window app so it's not necessary.
+
+The fix was simple, I just need to add a delegate to the `AppLauncher`, the `window_removed()` method will be called every time we close a window. When that happens, I just need to terminate the app.
+
 # Dec 22, 2021
 
 Today I implemented another shape drawing feature, Rectangle Tool (or `RectTool`)! Now we can draw boxes everywhere.
