@@ -2,6 +2,7 @@ use druid::Point;
 
 use crate::{
     consts::{
+        is_arrowhead, CHAR_ARROW_DOWN, CHAR_ARROW_LEFT, CHAR_ARROW_RIGHT, CHAR_ARROW_UP,
         CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_DOWN_L,
         CHAR_HOR_L, CHAR_HOR_UP_L, CHAR_SPACE, CHAR_VER_L, CHAR_VER_LEFT_L, CHAR_VER_RIGHT_L,
     },
@@ -33,6 +34,7 @@ impl ShapeRender for LineShape {
         grid_buffer.discard_all();
 
         let start_i = from_row * cols + from_col;
+        let start_char = grid_buffer.get(start_i).read_content().to_owned();
 
         match self.direction {
             LineDirection::Vertical => {
@@ -44,7 +46,15 @@ impl ShapeRender for LineShape {
                     grid_buffer.get(i).set_preview(CHAR_VER_L);
                 }
 
-                if grid_buffer.get(start_i).read_content() == CHAR_HOR_L {
+                if from_row > to_row {
+                    let head_i = from * cols + from_col;
+                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_DOWN);
+                } else {
+                    let head_i = to * cols + from_col;
+                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_UP);
+                }
+
+                if start_char == CHAR_HOR_L || is_arrowhead(start_char) {
                     let prev_i = from_row * cols + (from_col - 1);
                     let next_i = from_row * cols + (from_col + 1);
                     if grid_buffer.get(prev_i).read() == CHAR_SPACE {
@@ -85,7 +95,15 @@ impl ShapeRender for LineShape {
                     grid_buffer.get(i).set_preview(CHAR_HOR_L);
                 }
 
-                if grid_buffer.get(start_i).read_content() == CHAR_VER_L {
+                if from_col > to_col {
+                    let head_i = from_row * cols + from;
+                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_LEFT);
+                } else {
+                    let head_i = from_row * cols + to;
+                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_RIGHT);
+                }
+
+                if start_char == CHAR_VER_L || is_arrowhead(start_char) {
                     let prev_i = (from_row - 1) * cols + from_col;
                     let next_i = (from_row + 1) * cols + from_col;
                     if grid_buffer.get(prev_i).read() == CHAR_SPACE {

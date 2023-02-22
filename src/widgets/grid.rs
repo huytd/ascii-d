@@ -8,8 +8,7 @@ use druid::{
 use crate::{
     consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
     data::{
-        grid_cell::GridCell, grid_list::GridList, selection::SelectionRange, shape_list::ShapeList,
-        ApplicationState,
+        grid_list::GridList, selection::SelectionRange, shape_list::ShapeList, ApplicationState,
     },
     tools::{DrawingTools, ToolControl, ToolManager},
 };
@@ -61,15 +60,6 @@ impl CanvasGrid {
             let rows = (self.height / cell_height) as usize;
             let cols = (self.width / cell_width) as usize;
             self.grid_list = GridList::new(cell_width, cell_height, rows, cols);
-            for row in 0..rows {
-                for col in 0..cols {
-                    let i = row * cols + col;
-                    if i >= cols && i % cols == 0 {
-                        let cell = self.grid_list.get(i as usize);
-                        *cell = GridCell::newline();
-                    }
-                }
-            }
         }
     }
 }
