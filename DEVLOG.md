@@ -1,3 +1,24 @@
+# Feb 22, 2023
+
+Opened up the project after a long break, all the code seems to started making more sense, lol.
+
+So I think it would be a good idea to dust it off a little bit.
+
+![](_meta/open-save-file.gif)
+
+Now, ASCII-d can save and load from any text file. I guess I'll go with `.txt` format from now
+on.
+
+There are some problems though:
+
+1. The file loading is slow on the first load, and become faster on subsequence loads. Not sure why.
+2. The loaded content does not have any shape data, so it would be loaded as a flat string. Still have no idea how to go about this...
+
+But overall, the app is usable enough. I'll dogfooding for a while and see what can be improved.
+
+Had to update Druid to version `v0.8.2`. I was planning to stick on `0.7.0` because I don't want to deal with
+API changes, but ran into a serious issue that makes the app crash after opening the Save dialog ([druid#2213](https://github.com/linebender/druid/pull/2213)).
+
 # Mar 20, 2022
 
 I don't know why did I wait for so long to implement this.
