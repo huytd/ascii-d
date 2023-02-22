@@ -91,7 +91,26 @@ impl Widget<ApplicationState> for CanvasGrid {
                     Code::Escape => {
                         data.mode = DrawingTools::Select;
                     }
-                    _ => {}
+                    keycode => {
+                        if data.mode != DrawingTools::Text {
+                            // Only handle shortcut key if not in text mode
+                            match keycode {
+                                Code::Digit1 | Code::KeyL | Code::KeyA => {
+                                    data.mode = DrawingTools::Line;
+                                }
+                                Code::Digit2 | Code::KeyR => {
+                                    data.mode = DrawingTools::Rect;
+                                }
+                                Code::Digit3 | Code::KeyT => {
+                                    data.mode = DrawingTools::Text;
+                                }
+                                Code::Digit4 | Code::KeyE => {
+                                    data.mode = DrawingTools::Eraser;
+                                }
+                                _ => {}
+                            }
+                        }
+                    }
                 }
                 self.tool_manager
                     .input(ctx, event, &mut self.shape_list, &mut self.grid_list);
