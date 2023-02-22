@@ -2,11 +2,13 @@ use super::image_button::ImageButton;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
     widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
-    Color, Event, ImageBuf, Point, Rect, RenderContext, Size, Widget, WidgetPod,
+    Color, Event, FileDialogOptions, FileSpec, ImageBuf, Point, Rect, RenderContext, Size, Widget,
+    WidgetPod,
 };
 
 pub struct ToolBarWidget {
-    buttons: WidgetPod<ApplicationState, Flex<ApplicationState>>,
+    left_buttons: WidgetPod<ApplicationState, Flex<ApplicationState>>,
+    right_buttons: WidgetPod<ApplicationState, Flex<ApplicationState>>,
 }
 
 impl ToolBarWidget {
@@ -18,7 +20,27 @@ impl ToolBarWidget {
         let rect_icon = ImageBuf::from_data(include_bytes!("../../assets/rect-icon.png")).unwrap();
         let eraser_icon =
             ImageBuf::from_data(include_bytes!("../../assets/eraser-icon.png")).unwrap();
-        let pod = WidgetPod::new(
+        let save_icon = ImageBuf::from_data(include_bytes!("../../assets/save-icon.png")).unwrap();
+        let open_icon = ImageBuf::from_data(include_bytes!("../../assets/open-icon.png")).unwrap();
+
+        let save_dialog_options = FileDialogOptions::new()
+            .allowed_types(vec![FileSpec::TEXT])
+            .default_type(FileSpec::TEXT)
+            .default_name("diagram")
+            .name_label("Destination")
+            .title("Save diagram")
+            .button_text("Save");
+
+        let open_dialog_options = save_dialog_options
+            .clone()
+            .allowed_types(vec![FileSpec::TEXT])
+            .default_type(FileSpec::TEXT)
+            .default_name("diagram.txt")
+            .name_label("Source")
+            .title("Open diagram")
+            .button_text("Open");
+
+        let left_buttons = WidgetPod::new(
             Flex::row()
                 .with_child(
                     ImageButton::new(
@@ -92,7 +114,38 @@ impl ToolBarWidget {
                 .cross_axis_alignment(CrossAxisAlignment::End)
                 .main_axis_alignment(MainAxisAlignment::Start),
         );
-        ToolBarWidget { buttons: pod }
+
+        let right_buttons = WidgetPod::new(
+            Flex::row()
+                .with_child(
+                    ImageButton::new(open_icon, Size::new(26.0, 26.0), String::new()).on_click(
+                        move |ctx, _: &mut ApplicationState, _env| {
+                            ctx.submit_command(
+                                druid::commands::SHOW_OPEN_PANEL.with(open_dialog_options.clone()),
+                            );
+                            ctx.set_handled();
+                        },
+                    ),
+                )
+                .with_spacer(4.0)
+                .with_child(
+                    ImageButton::new(save_icon, Size::new(26.0, 26.0), String::new()).on_click(
+                        move |ctx, _: &mut ApplicationState, _env| {
+                            ctx.submit_command(
+                                druid::commands::SHOW_SAVE_PANEL.with(save_dialog_options.clone()),
+                            );
+                            ctx.set_handled();
+                        },
+                    ),
+                )
+                .cross_axis_alignment(CrossAxisAlignment::End)
+                .main_axis_alignment(MainAxisAlignment::Start),
+        );
+
+        ToolBarWidget {
+            left_buttons,
+            right_buttons,
+        }
     }
 }
 
@@ -104,23 +157,33 @@ impl Widget<ApplicationState> for ToolBarWidget {
         data: &mut ApplicationState,
         env: &druid::Env,
     ) {
-        self.buttons.event(ctx, event, data, env);
+        self.left_buttons.event(ctx, event, data, env);
+        self.right_buttons.event(ctx, event, data, env);
+
         // Prevent the mouse event to be propagated to underlying widgets
         match event {
             Event::WindowConnected => {
                 ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
             }
             Event::MouseDown(event) | Event::MouseUp(event) | Event::MouseMove(event) => {
-                let size = ctx.size();
-                let content_width = self.buttons.layout_rect().width();
-                let rect = Rect::new(
-                    20.0,
-                    size.height - 53.0,
-                    20.0 + content_width + 12.0,
-                    size.height - 17.0,
-                );
-                if rect.contains(event.pos) {
-                    ctx.set_handled();
+                let Self {
+                    left_buttons,
+                    right_buttons,
+                } = &self;
+
+                for area in &[left_buttons, right_buttons] {
+                    let position = area.layout_rect().origin();
+                    let content_width = area.layout_rect().width(); //.min(ctx.window().get_size().width - 2.0 * 26.0);
+                    let size = ctx.size();
+                    let rect = Rect::new(
+                        position.x - 4.0,
+                        size.height - 53.0,
+                        position.x - 4.0 + content_width + 12.0,
+                        size.height - 17.0,
+                    );
+                    if rect.contains(event.pos) {
+                        ctx.set_handled();
+                    }
                 }
             }
             Event::Notification(notification) => {
@@ -139,7 +202,8 @@ impl Widget<ApplicationState> for ToolBarWidget {
         data: &ApplicationState,
         env: &druid::Env,
     ) {
-        self.buttons.lifecycle(ctx, event, data, env);
+        self.left_buttons.lifecycle(ctx, event, data, env);
+        self.right_buttons.lifecycle(ctx, event, data, env);
     }
 
     fn update(
@@ -152,7 +216,8 @@ impl Widget<ApplicationState> for ToolBarWidget {
         if old_data.mode != data.mode {
             ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
         }
-        self.buttons.update(ctx, data, env);
+        self.left_buttons.update(ctx, data, env);
+        self.right_buttons.update(ctx, data, env);
         ctx.request_paint();
     }
 
@@ -163,37 +228,56 @@ impl Widget<ApplicationState> for ToolBarWidget {
         data: &ApplicationState,
         env: &druid::Env,
     ) -> Size {
-        self.buttons.layout(ctx, bc, data, env);
-        self.buttons
-            .set_origin(ctx, data, env, Point::new(26.0, -26.0 + 4.0));
+        let window_size = ctx.window().get_size();
+
+        self.left_buttons
+            .set_origin(ctx, Point::new(26.0, -26.0 + 4.0));
+
+        self.right_buttons.set_origin(
+            ctx,
+            Point::new(window_size.width - 26.0 * 3.0 - 8.0, -26.0 + 4.0),
+        );
+
+        self.left_buttons.layout(ctx, bc, data, env);
+        self.right_buttons.layout(ctx, bc, data, env);
+
         Size {
-            width: 100.0,
+            width: window_size.width,
             height: 26.0,
         }
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &ApplicationState, env: &druid::Env) {
-        let content_width = self.buttons.layout_rect().width();
-        let size = ctx.size();
-        let brush = ctx.solid_brush(Color::from_hex_str("#333333").unwrap());
-        let stroke_brush = ctx.solid_brush(Color::from_hex_str("#4c4c4c").unwrap());
-        let shadow_brush = ctx.solid_brush(Color::rgba(0.0, 0.0, 0.0, 0.55));
-        let rect = Rect::new(
-            20.0,
-            size.height - 53.0,
-            20.0 + content_width + 12.0,
-            size.height - 17.0,
-        );
-        let shadow_rect = Rect::new(
-            20.0,
-            size.height - 47.0,
-            20.0 + content_width + 12.0,
-            size.height - 17.0,
-        );
-        ctx.blurred_rect(shadow_rect, 5.0, &shadow_brush);
-        ctx.fill(rect.to_rounded_rect(5.0), &brush);
-        ctx.stroke(rect.to_rounded_rect(5.0), &stroke_brush, 1.0);
+        let Self {
+            left_buttons,
+            right_buttons,
+        } = &self;
 
-        self.buttons.paint(ctx, data, env);
+        for area in &[left_buttons, right_buttons] {
+            let position = area.layout_rect().origin();
+            let content_width = area.layout_rect().width(); //.min(ctx.window().get_size().width - 2.0 * 26.0);
+            let size = ctx.size();
+            let brush = ctx.solid_brush(Color::from_hex_str("#333333").unwrap());
+            let stroke_brush = ctx.solid_brush(Color::from_hex_str("#4c4c4c").unwrap());
+            let shadow_brush = ctx.solid_brush(Color::rgba(0.0, 0.0, 0.0, 0.55));
+            let rect = Rect::new(
+                position.x - 4.0,
+                size.height - 53.0,
+                position.x - 4.0 + content_width + 12.0,
+                size.height - 17.0,
+            );
+            let shadow_rect = Rect::new(
+                position.x - 4.0,
+                size.height - 47.0,
+                position.x - 4.0 + content_width + 12.0,
+                size.height - 17.0,
+            );
+            ctx.blurred_rect(shadow_rect, 5.0, &shadow_brush);
+            ctx.fill(rect.to_rounded_rect(5.0), &brush);
+            ctx.stroke(rect.to_rounded_rect(5.0), &stroke_brush, 1.0);
+        }
+
+        self.left_buttons.paint(ctx, data, env);
+        self.right_buttons.paint(ctx, data, env);
     }
 }

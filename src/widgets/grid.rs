@@ -1,8 +1,8 @@
-use std::usize;
+use std::{fs::File, io::Write, usize};
 
 use druid::{
-    kurbo::Line, piet::Text, theme, Code, Color, Cursor, Event, FontDescriptor, FontFamily,
-    FontWeight, LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
+    commands, kurbo::Line, piet::Text, theme, Code, Color, Cursor, Event, FontDescriptor,
+    FontFamily, FontWeight, LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
@@ -154,6 +154,23 @@ impl Widget<ApplicationState> for CanvasGrid {
                     }
                     // TODO: Visually highlight selected shapes, and make them movable
                     self.selection_range.discard();
+                }
+                if let Some(file_info) = cmd.get(commands::SAVE_FILE_AS) {
+                    println!("Save File {:?}", file_info.path());
+                    if let Ok(mut file) = File::create(file_info.path()) {
+                        _ = file.write_all(self.grid_list.to_string().as_bytes());
+                    }
+                }
+                if let Some(file_info) = cmd.get(commands::OPEN_FILE) {
+                    match std::fs::read_to_string(file_info.path()) {
+                        Ok(content) => {
+                            self.grid_list.clear_all();
+                            self.grid_list.load_content(content);
+                        }
+                        Err(e) => {
+                            println!("Error opening file: {e}");
+                        }
+                    }
                 }
             }
             _ => {}

@@ -1,4 +1,5 @@
 use druid::{
+    commands,
     widget::{Scroll, SizedBox},
     AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Event, Handled, LifeCycle,
     PlatformError, Target, Widget, WidgetPod, WindowDesc, WindowId,
@@ -99,7 +100,7 @@ fn main() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(WindowDesc::new(MainWindow::new()).title("ASCII-d"));
-    app.delegate(Delegate {}).launch(ApplicationState {
+    app.delegate(Delegate).launch(ApplicationState {
         mode: tools::DrawingTools::Select,
     })?;
     Ok(())
