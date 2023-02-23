@@ -10,4 +10,5 @@ pub mod shape_list;
 #[derive(Clone, PartialEq, Data)]
 pub struct ApplicationState {
     pub mode: DrawingTools,
+    pub current_file: Option<String>,
 }
