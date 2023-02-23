@@ -1,8 +1,11 @@
 use std::{fs::File, io::Write, usize};
 
 use druid::{
-    commands, kurbo::Line, piet::Text, theme, Code, Color, Cursor, Event, FontDescriptor,
-    FontFamily, FontWeight, LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
+    commands::{self, NEW_FILE},
+    kurbo::Line,
+    piet::Text,
+    theme, Application, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
+    LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
@@ -99,6 +102,21 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 }
                                 _ => {}
                             }
+
+                            if event.mods.meta() || event.mods.ctrl() {
+                                match keycode {
+                                    Code::KeyC => {
+                                        // copy current diagram to clipboard
+                                        Application::global()
+                                            .clipboard()
+                                            .put_string(self.grid_list.to_string());
+                                    }
+                                    Code::KeyN => {
+                                        ctx.submit_command(NEW_FILE);
+                                    }
+                                    _ => {}
+                                }
+                            }
                         }
                     }
                 }
@@ -168,6 +186,12 @@ impl Widget<ApplicationState> for CanvasGrid {
                     println!("Save File {:?}", file_info.path());
                     if let Ok(mut file) = File::create(file_info.path()) {
                         _ = file.write_all(self.grid_list.to_string().as_bytes());
+                        if let Some(file_name) =
+                            file_info.path().to_str().and_then(|s| Some(s.to_string()))
+                        {
+                            data.current_file = Some(file_name.clone());
+                            ctx.window().set_title(file_name.as_str());
+                        }
                     }
                 }
                 if let Some(file_info) = cmd.get(commands::OPEN_FILE) {
@@ -175,6 +199,12 @@ impl Widget<ApplicationState> for CanvasGrid {
                         Ok(content) => {
                             self.grid_list.clear_all();
                             self.grid_list.load_content(content);
+                            if let Some(file_name) =
+                                file_info.path().to_str().and_then(|s| Some(s.to_string()))
+                            {
+                                data.current_file = Some(file_name.clone());
+                                ctx.window().set_title(file_name.as_str());
+                            }
                         }
                         Err(e) => {
                             println!("Error opening file: {e}");

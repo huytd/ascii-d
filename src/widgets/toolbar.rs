@@ -1,9 +1,11 @@
+use std::path::PathBuf;
+
 use super::image_button::ImageButton;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
     widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
-    Color, Event, FileDialogOptions, FileSpec, ImageBuf, Point, Rect, RenderContext, Size, Widget,
-    WidgetPod,
+    Application, Color, Event, FileDialogOptions, FileInfo, FileSpec, ImageBuf, Point, Rect,
+    RenderContext, Size, Widget, WidgetPod,
 };
 
 pub struct ToolBarWidget {
@@ -22,23 +24,6 @@ impl ToolBarWidget {
             ImageBuf::from_data(include_bytes!("../../assets/eraser-icon.png")).unwrap();
         let save_icon = ImageBuf::from_data(include_bytes!("../../assets/save-icon.png")).unwrap();
         let open_icon = ImageBuf::from_data(include_bytes!("../../assets/open-icon.png")).unwrap();
-
-        let save_dialog_options = FileDialogOptions::new()
-            .allowed_types(vec![FileSpec::TEXT])
-            .default_type(FileSpec::TEXT)
-            .default_name("diagram")
-            .name_label("Destination")
-            .title("Save diagram")
-            .button_text("Save");
-
-        let open_dialog_options = save_dialog_options
-            .clone()
-            .allowed_types(vec![FileSpec::TEXT])
-            .default_type(FileSpec::TEXT)
-            .default_name("diagram.txt")
-            .name_label("Source")
-            .title("Open diagram")
-            .button_text("Open");
 
         let left_buttons = WidgetPod::new(
             Flex::row()
@@ -120,9 +105,7 @@ impl ToolBarWidget {
                 .with_child(
                     ImageButton::new(open_icon, Size::new(26.0, 26.0), String::new()).on_click(
                         move |ctx, _: &mut ApplicationState, _env| {
-                            ctx.submit_command(
-                                druid::commands::SHOW_OPEN_PANEL.with(open_dialog_options.clone()),
-                            );
+                            open_from_file(ctx);
                             ctx.set_handled();
                         },
                     ),
@@ -130,10 +113,8 @@ impl ToolBarWidget {
                 .with_spacer(4.0)
                 .with_child(
                     ImageButton::new(save_icon, Size::new(26.0, 26.0), String::new()).on_click(
-                        move |ctx, _: &mut ApplicationState, _env| {
-                            ctx.submit_command(
-                                druid::commands::SHOW_SAVE_PANEL.with(save_dialog_options.clone()),
-                            );
+                        move |ctx, data: &mut ApplicationState, _env| {
+                            save_to_file(data, ctx);
                             ctx.set_handled();
                         },
                     ),
@@ -146,6 +127,37 @@ impl ToolBarWidget {
             left_buttons,
             right_buttons,
         }
+    }
+}
+
+fn open_from_file(ctx: &mut druid::EventCtx) {
+    let open_dialog_options = FileDialogOptions::new()
+        .allowed_types(vec![FileSpec::TEXT])
+        .default_type(FileSpec::TEXT)
+        .default_name("diagram.txt")
+        .name_label("Source")
+        .title("Open diagram")
+        .button_text("Open");
+
+    ctx.submit_command(druid::commands::SHOW_OPEN_PANEL.with(open_dialog_options));
+}
+
+fn save_to_file(data: &mut ApplicationState, ctx: &mut druid::EventCtx) {
+    let save_dialog_options = FileDialogOptions::new()
+        .allowed_types(vec![FileSpec::TEXT])
+        .default_type(FileSpec::TEXT)
+        .default_name("diagram")
+        .name_label("Destination")
+        .title("Save diagram")
+        .button_text("Save");
+
+    if let Some(current_file) = &data.current_file {
+        ctx.submit_command(druid::commands::SAVE_FILE_AS.with(FileInfo {
+            path: PathBuf::from(current_file),
+            format: None,
+        }));
+    } else {
+        ctx.submit_command(druid::commands::SHOW_SAVE_PANEL.with(save_dialog_options));
     }
 }
 
@@ -191,6 +203,20 @@ impl Widget<ApplicationState> for ToolBarWidget {
                     ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(name.to_string()));
                 }
             }
+            Event::KeyDown(event) => {
+                if data.mode != DrawingTools::Text && event.mods.meta() || event.mods.ctrl() {
+                    match event.code {
+                        druid::Code::KeyS => {
+                            save_to_file(data, ctx);
+                        }
+                        druid::Code::KeyO => {
+                            open_from_file(ctx);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+
             _ => {}
         }
     }
