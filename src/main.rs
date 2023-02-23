@@ -1,8 +1,8 @@
 use druid::{
-    commands,
+    commands::NEW_FILE,
     widget::{Scroll, SizedBox},
-    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Event, Handled, LifeCycle,
-    PlatformError, Target, Widget, WidgetPod, WindowDesc, WindowId,
+    AppDelegate, AppLauncher, Application, Code, Command, DelegateCtx, Env, Event, Handled,
+    LifeCycle, PlatformError, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
 
 #[macro_use]
@@ -81,7 +81,9 @@ impl Widget<ApplicationState> for MainWindow {
     }
 }
 
-struct Delegate;
+struct Delegate {
+    windows: Vec<WindowId>,
+}
 
 impl AppDelegate<ApplicationState> for Delegate {
     fn window_removed(
@@ -91,8 +93,40 @@ impl AppDelegate<ApplicationState> for Delegate {
         env: &Env,
         ctx: &mut DelegateCtx,
     ) {
-        // Quit when the window is closed
-        Application::global().quit();
+        if let Some(pos) = self.windows.iter().position(|x| *x == id) {
+            self.windows.remove(pos);
+        }
+        if self.windows.len() == 0 {
+            // Quit when the window is closed
+            Application::global().quit();
+        }
+    }
+
+    fn window_added(
+        &mut self,
+        id: WindowId,
+        handle: druid::WindowHandle,
+        data: &mut ApplicationState,
+        env: &Env,
+        ctx: &mut DelegateCtx,
+    ) {
+        self.windows.push(id);
+    }
+
+    fn command(
+        &mut self,
+        ctx: &mut DelegateCtx,
+        target: Target,
+        cmd: &Command,
+        data: &mut ApplicationState,
+        env: &Env,
+    ) -> Handled {
+        if cmd.is(NEW_FILE) {
+            let new_win = WindowDesc::new(MainWindow::new()).title("ASCII-d");
+            ctx.new_window(new_win);
+            return Handled::Yes;
+        }
+        Handled::No
     }
 }
 
@@ -100,8 +134,12 @@ fn main() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(WindowDesc::new(MainWindow::new()).title("ASCII-d"));
-    app.delegate(Delegate).launch(ApplicationState {
+    app.delegate(Delegate {
+        windows: Vec::new(),
+    })
+    .launch(ApplicationState {
         mode: tools::DrawingTools::Select,
+        current_file: None,
     })?;
     Ok(())
 }
