@@ -11,7 +11,7 @@ druid = { git = "https://github.com/linebender/druid", version = "0.8.2", featur
 
 [package.metadata.bundle]
 copyright = "Copyright (c) Huy Tran 2023. All rights reserved."
-icon = []
+icon = ["icons/icon.icns"]
 identifier = "rocks.huy.ascii-d"
 name = "ASCII-d"
 version = "0.2.0"
