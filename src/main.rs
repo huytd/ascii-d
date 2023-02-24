@@ -1,8 +1,9 @@
+use consts::SELECTION_END_COMMAND;
 use druid::{
     commands::NEW_FILE,
     widget::{Scroll, SizedBox},
     AppDelegate, AppLauncher, Application, Code, Command, DelegateCtx, Env, Event, Handled,
-    LifeCycle, PlatformError, Target, Widget, WidgetPod, WindowDesc, WindowId,
+    LifeCycle, PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
 
 #[macro_use]
@@ -51,6 +52,11 @@ impl Widget<ApplicationState> for MainWindow {
             ui.add_child(Scroll::new(CanvasGrid::new(ctx)));
             ui.add_child(ToolBarWidget::new());
             self.content = WidgetPod::new(Box::new(ui));
+        }
+        if let LifeCycle::HotChanged(is_hot) = event {
+            if !is_hot {
+                ctx.submit_command(SELECTION_END_COMMAND.with(Point { x: 0.0, y: 0.0 }));
+            }
         }
         self.content.lifecycle(ctx, event, data, env);
     }
@@ -133,7 +139,11 @@ impl AppDelegate<ApplicationState> for Delegate {
 fn main() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
-    let app = AppLauncher::with_window(WindowDesc::new(MainWindow::new()).title("ASCII-d"));
+    let app = AppLauncher::with_window(
+        WindowDesc::new(MainWindow::new())
+            .title("ASCII-d")
+            .window_size((640.0, 480.0)),
+    );
     app.delegate(Delegate {
         windows: Vec::new(),
     })

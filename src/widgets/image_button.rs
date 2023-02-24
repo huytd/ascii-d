@@ -42,6 +42,7 @@ impl<T: Data> Widget<T> for ImageButton<T> {
                 if !ctx.is_disabled() {
                     ctx.set_active(true);
                     ctx.request_paint();
+                    ctx.set_handled();
                 }
             }
             Event::MouseUp(_) => {

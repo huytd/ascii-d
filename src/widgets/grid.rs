@@ -100,6 +100,10 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 Code::Digit4 | Code::KeyE => {
                                     data.mode = DrawingTools::Eraser;
                                 }
+                                Code::Delete | Code::Backspace => {
+                                    self.grid_list.erase_highlighted();
+                                    self.grid_list.clear_all_highlight();
+                                }
                                 _ => {}
                             }
 
@@ -109,7 +113,24 @@ impl Widget<ApplicationState> for CanvasGrid {
                                         // copy current diagram to clipboard
                                         Application::global()
                                             .clipboard()
-                                            .put_string(self.grid_list.to_string());
+                                            .put_string(self.grid_list.get_highlighted_content());
+                                    }
+                                    Code::KeyX => {
+                                        // cut current diagram to clipboard
+                                        Application::global()
+                                            .clipboard()
+                                            .put_string(self.grid_list.get_highlighted_content());
+                                        self.grid_list.erase_highlighted();
+                                        self.grid_list.clear_all_highlight();
+                                    }
+                                    Code::KeyV => {
+                                        // paste clipboard content to mouse position
+                                        if let Some(content) =
+                                            Application::global().clipboard().get_string()
+                                        {
+                                            let (row, col) = self.mouse_position;
+                                            self.grid_list.load_content_at(content, row, col);
+                                        }
                                     }
                                     Code::KeyN => {
                                         ctx.submit_command(NEW_FILE);
@@ -159,25 +180,11 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
                     self.selection_range.set_end(*point);
                 }
-                if let Some(point) = cmd.get(SELECTION_END_COMMAND) {
+                if let Some(_) = cmd.get(SELECTION_END_COMMAND) {
                     if let Some(rect) = self.selection_range.as_rect() {
-                        // Selected a range
-                        let matched = self
-                            .shape_list
-                            .find_shape_in_rect(rect, &mut self.grid_list);
-
-                        println!(
-                            "FOUND {:?}",
-                            matched.iter().map(|s| s.get_points()).collect::<Vec<_>>()
-                        );
+                        self.grid_list.highlight_rect(rect);
                     } else {
-                        // Selected a single point
-                        if let Some(matched) = self
-                            .shape_list
-                            .find_shape_in_point(*point, &mut self.grid_list)
-                        {
-                            println!("SELECT SINGLE POINT {:?}", matched.get_points());
-                        }
+                        self.grid_list.clear_all_highlight();
                     }
                     // TODO: Visually highlight selected shapes, and make them movable
                     self.selection_range.discard();
@@ -218,7 +225,7 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn lifecycle(
         &mut self,
-        _ctx: &mut druid::LifeCycleCtx,
+        ctx: &mut druid::LifeCycleCtx,
         event: &druid::LifeCycle,
         _data: &ApplicationState,
         _env: &druid::Env,
