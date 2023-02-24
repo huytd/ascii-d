@@ -177,27 +177,6 @@ impl Widget<ApplicationState> for ToolBarWidget {
             Event::WindowConnected => {
                 ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
             }
-            Event::MouseDown(event) | Event::MouseUp(event) | Event::MouseMove(event) => {
-                let Self {
-                    left_buttons,
-                    right_buttons,
-                } = &self;
-
-                for area in &[left_buttons, right_buttons] {
-                    let position = area.layout_rect().origin();
-                    let content_width = area.layout_rect().width(); //.min(ctx.window().get_size().width - 2.0 * 26.0);
-                    let size = ctx.size();
-                    let rect = Rect::new(
-                        position.x - 4.0,
-                        size.height - 53.0,
-                        position.x - 4.0 + content_width + 12.0,
-                        size.height - 17.0,
-                    );
-                    if rect.contains(event.pos) {
-                        ctx.set_handled();
-                    }
-                }
-            }
             Event::Notification(notification) => {
                 if let Some(name) = notification.get(BUTTON_HIGHLIGHT_COMMAND) {
                     ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(name.to_string()));

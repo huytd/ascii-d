@@ -2,6 +2,7 @@ use crate::consts::{CHAR_NEWLINE, CHAR_SPACE};
 
 #[derive(Clone, Copy)]
 pub struct GridCell {
+    pub highlight_index: usize,
     pub content: char,
     pub preview: Option<char>,
     pub highlighted: bool,
@@ -10,6 +11,7 @@ pub struct GridCell {
 impl GridCell {
     pub fn new(content: char) -> Self {
         Self {
+            highlight_index: 0,
             content,
             preview: None,
             highlighted: false,
@@ -38,6 +40,7 @@ impl GridCell {
     pub fn clear(&mut self) {
         self.content = CHAR_SPACE;
         self.preview = None;
+        self.highlight_index = 0;
     }
 
     pub fn set_content(&mut self, content: char) {
@@ -59,11 +62,13 @@ impl GridCell {
         self.preview = None;
     }
 
-    pub fn highlight(&mut self) {
+    pub fn highlight(&mut self, highlight_index: usize) {
         self.highlighted = true;
+        self.highlight_index = highlight_index;
     }
 
     pub fn clear_highlight(&mut self) {
         self.highlighted = false;
+        self.highlight_index = 0;
     }
 }
