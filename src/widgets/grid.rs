@@ -180,7 +180,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
                     self.selection_range.set_end(*point);
                 }
-                if let Some(_) = cmd.get(SELECTION_END_COMMAND) {
+                if let Some(point) = cmd.get(SELECTION_END_COMMAND) {
                     if let Some(rect) = self.selection_range.as_rect() {
                         self.grid_list.highlight_rect(rect);
                     } else {
@@ -287,9 +287,11 @@ impl Widget<ApplicationState> for CanvasGrid {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
             let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
-            let cursor_brush = ctx.solid_brush(Color::RED);
+            let cursor_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91).with_alpha(0.5));
+            let highlight_brush = ctx.solid_brush(Color::RED);
             let primary_color = env.get(theme::PRIMARY_LIGHT);
             let selection_brush = ctx.solid_brush(primary_color.with_alpha(0.5));
+            let (m_row, m_col) = self.mouse_position;
 
             if let Some((cell_width, cell_height)) = self.cell_size {
                 let start = (
@@ -326,6 +328,18 @@ impl Widget<ApplicationState> for CanvasGrid {
                     for col in (start.0)..(end.0) {
                         let i = row * cols + col;
 
+                        if m_row == row && m_col == col {
+                            let m_row = row as f64;
+                            let m_col = col as f64;
+                            let m_rect = Rect::new(
+                                m_col * cell_width,
+                                m_row * cell_height,
+                                m_col * cell_width + cell_width,
+                                m_row * cell_height + cell_height,
+                            );
+                            ctx.fill(m_rect, &cursor_brush);
+                        }
+
                         if self.grid_list.get(i).highlighted {
                             let h_row = row as f64;
                             let h_col = col as f64;
@@ -335,7 +349,8 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 h_col * cell_width + cell_width,
                                 h_row * cell_height + cell_height,
                             );
-                            ctx.stroke(h_rect, &cursor_brush, 1.0);
+
+                            ctx.stroke(h_rect, &highlight_brush, 1.0);
                         }
 
                         let cell_content = self.grid_list.get(i).read();
