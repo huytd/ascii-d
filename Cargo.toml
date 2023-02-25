@@ -4,10 +4,19 @@ name = "ascii-d"
 version = "0.2.0"
 edition = "2018"
 
+[lib]
+crate-type=["cdylib", "rlib"]
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 druid = { git = "https://github.com/linebender/druid", version = "0.8.2", features = ["image", "png"] }
+wasm-bindgen = "0.2.30"
+console_error_panic_hook = { version = "0.1.1", optional = true }
+
+[dependencies.web-sys]
+version = "0.3"
+features = ["console"]
 
 [package.metadata.bundle]
 copyright = "Copyright (c) Huy Tran 2023. All rights reserved."

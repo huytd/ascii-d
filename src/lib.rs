@@ -5,6 +5,7 @@ use druid::{
     AppDelegate, AppLauncher, Application, Code, Command, DelegateCtx, Env, Event, Handled,
     LifeCycle, PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
+use wasm_bindgen::prelude::*;
 
 #[macro_use]
 mod macros;
@@ -152,4 +153,12 @@ fn main() -> Result<(), PlatformError> {
         current_file: None,
     })?;
     Ok(())
+}
+
+#[wasm_bindgen]
+pub fn bootstrap() {
+    #[cfg(feature = "console_error_panic_hook")]
+    std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+
+    main();
 }
