@@ -1,8 +1,67 @@
+# Feb 23, 2023
+
+## Clipboard support
+
+Copy/paste is a must have for any editor. To implement this, the flow would look like this:
+
+```
+┌────────────────────────────────────────────────────┐ 
+│User Click and Drag                                 │ 
+│ │                                                  │ 
+│ └► Trigger SELECT event──► Highlight selected cells│ 
+└────────────────────────────────────────────────────┘ 
+┌────────────────────────────────────────────────────┐ 
+│User Pressed <Meta>+X / <Meta>+X                    │ 
+│ │                                                  │ 
+│ └► Get highlighted cells──► Compute selected area  │ 
+│                   ┌──────────────────┘             │ 
+│                   🭭                                │ 
+│             Get content in the──► Put to Clipboard │ 
+│             selected area                          │ 
+└────────────────────────────────────────────────────┘ 
+```
+
+For both select/highlight and extracting content, we have the same behavior. We defined a selected
+range as a rectangle:
+
+```rust
+selected_range = Rect(start_row, start_col, end_row, end_col)
+selected_width = selected_range.width
+selected_height = selected_range.height
+```
+
+We can access the selected cells of the character grid (which is a 1D array) with the following snippet:
+
+```rust
+for row in 0..selected_height {
+  for col in 0..selected_width {
+    let index = (start_row + row) * grid_width + (start_col + col);
+    // access character_grid[index] here
+  }
+}
+```
+
+We can toggle each cell's highlight property on/off. And to build the content string for the selected range,
+we just need to build a string where each line content the whole selected row.
+
+You can check the commit for more details [fdd2e02](https://github.com/huytd/ascii-d/pull/12/commits/fdd2e02f674df4d219128f3d92fc0aea203df18c).
+
+For usage:
+
+- In cursor mode, click and drag on the grid to select content
+- Use <kbd>Meta</kbd><kbd>C</kbd> to copy the selected content
+- Use <kbd>Meta</kbd><kbd>X</kbd> to cut the selected content
+- Use <kbd>Meta</kbd><kbd>V</kbd> to paste the clipboard content into the mouse position
+
+![ascii-d-copy-paste](https://user-images.githubusercontent.com/613943/221081911-a085bcc7-8374-4deb-bca9-0950c53f055e.gif)
+
 # Feb 22, 2023
 
 Opened up the project after a long break, all the code seems to started making more sense, lol.
 
 So I think it would be a good idea to dust it off a little bit.
+
+## Save and load files
 
 ![](_meta/open-save-file.gif)
 
@@ -18,6 +77,85 @@ But overall, the app is usable enough. I'll dogfooding for a while and see what 
 
 Had to update Druid to version `v0.8.2`. I was planning to stick on `0.7.0` because I don't want to deal with
 API changes, but ran into a serious issue that makes the app crash after opening the Save dialog ([druid#2213](https://github.com/linebender/druid/pull/2213)).
+
+## Draw arrowheads
+
+Another update is to switch to arrow drawing instead of just line drawing, picking the right characters to use is a little bit
+of a labor work (LOL). Since not all characters will fit nicely to the character grid. Luckily, I was able to (shamelessly) 
+steal the arrows from [the ASCIIflow project](https://github.com/lewish/asciiflow/blob/8b9148f6c639f27e09f226ef173828744a2fb645/client/constants.ts#L29-L32).
+
+```rust
+pub const CHAR_ARROW_DOWN: char = '🭯';
+pub const CHAR_ARROW_UP: char = '🭭';
+pub const CHAR_ARROW_RIGHT: char = '►';
+pub const CHAR_ARROW_LEFT: char = '◄';
+```
+
+The output drawing would look like this:
+
+```
+     🭯          
+     │    🭯     
+  ◄──┴────┤     
+        ┌─┴──►  
+        │       
+  ┌─────┴────┐  
+  │ a box !! │  
+  └──────────┘  
+```
+
+## Support multiple windows
+
+Another update (this is how it looks like to code again after a long break, endless idea!!) is to support multiple windows. Now we can open multiple files
+in multiple windows, make it easier for drawing multiple ideas!
+
+![](https://user-images.githubusercontent.com/613943/220793686-a9e01441-4345-4609-a2ef-b5b1788825f2.png)
+
+Here's the list of keyboard shortcuts up until this point:
+
+- <kbd>Meta</kbd><kbd>O</kbd>: Open a new file
+- <kbd>Meta</kbd><kbd>S</kbd>: Save the current buffer to file
+- <kbd>Meta</kbd><kbd>C</kbd>: Copy current buffer content into the Clipboard
+- <kbd>Meta</kbd><kbd>N</kbd>: Open a new empty window
+
+In Druid, to support multiple windows, it's quite straightforward. First, we need a list of opened windows, it can be in the `Delegate` struct:
+
+```rust
+struct Delegate {
+    windows: Vec<WindowId>,
+}
+```
+
+And also implement the `window_added()`, `window_removed()` method to handle adding/removing windows. The app will be closed after the last window is closed:
+
+```rust
+fn window_added(
+    &mut self,
+    id: WindowId,
+    handle: druid::WindowHandle,
+    data: &mut ApplicationState,
+    env: &Env,
+    ctx: &mut DelegateCtx,
+) {
+    self.windows.push(id);
+}
+
+fn window_removed(
+    &mut self,
+    id: WindowId,
+    data: &mut ApplicationState,
+    env: &Env,
+    ctx: &mut DelegateCtx,
+) {
+    if let Some(pos) = self.windows.iter().position(|x| *x == id) {
+        self.windows.remove(pos);
+    }
+    if self.windows.len() == 0 {
+        // Quit when the window is closed
+        Application::global().quit();
+    }
+}
+```
 
 # Mar 20, 2022
 
