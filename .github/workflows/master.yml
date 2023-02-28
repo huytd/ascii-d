@@ -16,8 +16,12 @@ jobs:
           toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
+          command: install
+          args: cargo-bundle
+      - uses: actions-rs/cargo@v1
+        with:
           command: bundle
-          args: relesae
+          args: --release
   test-linux:
     name: Test Linux build
     runs-on: ubunto-22.04
@@ -28,8 +32,12 @@ jobs:
           toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
+          command: install
+          args: cargo-bundle
+      - uses: actions-rs/cargo@v1
+        with:
           command: bundle
-          args: relesae
+          args: --release
   test-wind:
     name: Test Windows build
     runs-on: windows-2019
@@ -40,5 +48,9 @@ jobs:
           toolchain: stable
       - uses: actions-rs/cargo@v1
         with:
+          command: install
+          args: cargo-bundle
+      - uses: actions-rs/cargo@v1
+        with:
           command: bundle
-          args: relesae
+          args: --release
