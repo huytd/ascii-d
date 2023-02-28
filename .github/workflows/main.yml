@@ -1,0 +1,44 @@
+on:
+  push:
+    branches:
+      - 'main'
+
+name: Test
+
+jobs:
+  test-mac:
+    name: Test macOS build
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: cargo-bundle
+  test-linux:
+    name: Test Linux build
+    runs-on: ubunto-22.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: cargo-bundle
+  test-wind:
+    name: Test Windows build
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: cargo-bundle
