@@ -2,9 +2,7 @@ use druid::Point;
 
 use crate::{
     consts::{
-        is_arrowhead, CHAR_ARROW_DOWN, CHAR_ARROW_LEFT, CHAR_ARROW_RIGHT, CHAR_ARROW_UP,
-        CHAR_CORNER_BL_L, CHAR_CORNER_BR_L, CHAR_CORNER_TL_L, CHAR_CORNER_TR_L, CHAR_HOR_DOWN_L,
-        CHAR_HOR_L, CHAR_HOR_UP_L, CHAR_SPACE, CHAR_VER_L, CHAR_VER_LEFT_L, CHAR_VER_RIGHT_L,
+        CHAR_ARROW_DOWN, CHAR_ARROW_LEFT, CHAR_ARROW_RIGHT, CHAR_ARROW_UP, CHAR_HOR_L, CHAR_VER_L,
     },
     data::grid_list::GridList,
 };
@@ -34,7 +32,6 @@ impl ShapeRender for LineShape {
         grid_buffer.discard_all();
 
         let start_i = from_row * cols + from_col;
-        let start_char = grid_buffer.get(start_i).read_content().to_owned();
 
         match self.direction {
             LineDirection::Vertical => {
@@ -54,38 +51,8 @@ impl ShapeRender for LineShape {
                     grid_buffer.get(head_i).set_preview(CHAR_ARROW_UP);
                 }
 
-                if start_char == CHAR_HOR_L || is_arrowhead(start_char) {
-                    let prev_i = from_row * cols + (from_col - 1);
-                    let next_i = from_row * cols + (from_col + 1);
-                    if grid_buffer.get(prev_i).read() == CHAR_SPACE {
-                        if from_row < to_row {
-                            // Draw down, put top-left corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TL_L);
-                        }
-                        if from_row > to_row {
-                            // Draw up, put bottom-left corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BL_L);
-                        }
-                    } else if grid_buffer.get(next_i).read() == CHAR_SPACE {
-                        if from_row < to_row {
-                            // Draw down, put top-right corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TR_L);
-                        }
-                        if from_row > to_row {
-                            // Draw up, put bottom-right corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BR_L);
-                        }
-                    } else {
-                        if from_row < to_row {
-                            // Draw down, put hor-down
-                            grid_buffer.get(start_i).set_preview(CHAR_HOR_DOWN_L);
-                        }
-                        if from_row > to_row {
-                            // Draw up, put hor-up
-                            grid_buffer.get(start_i).set_preview(CHAR_HOR_UP_L);
-                        }
-                    }
-                }
+                // Mark start of the line
+                grid_buffer.get(start_i).set_preview('-');
             }
             LineDirection::Horizontal => {
                 let from = if from_col > to_col { to_col } else { from_col };
@@ -103,38 +70,8 @@ impl ShapeRender for LineShape {
                     grid_buffer.get(head_i).set_preview(CHAR_ARROW_RIGHT);
                 }
 
-                if start_char == CHAR_VER_L || is_arrowhead(start_char) {
-                    let prev_i = (from_row - 1) * cols + from_col;
-                    let next_i = (from_row + 1) * cols + from_col;
-                    if grid_buffer.get(prev_i).read() == CHAR_SPACE {
-                        if from_col < to_col {
-                            // Draw right, put top-left corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TL_L);
-                        }
-                        if from_col > to_col {
-                            // Draw left, put top-right corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_TR_L);
-                        }
-                    } else if grid_buffer.get(next_i).read() == CHAR_SPACE {
-                        if from_col < to_col {
-                            // Draw right, put bottom-left corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BL_L);
-                        }
-                        if from_col > to_col {
-                            // Draw left, put bottom-right corner
-                            grid_buffer.get(start_i).set_preview(CHAR_CORNER_BR_L);
-                        }
-                    } else {
-                        if from_col < to_col {
-                            // Draw right, put ver-right
-                            grid_buffer.get(start_i).set_preview(CHAR_VER_RIGHT_L);
-                        }
-                        if from_col > to_col {
-                            // Draw left, put ver-left
-                            grid_buffer.get(start_i).set_preview(CHAR_VER_LEFT_L);
-                        }
-                    }
-                }
+                // Mark start of the line
+                grid_buffer.get(start_i).set_preview('.');
             }
         }
     }

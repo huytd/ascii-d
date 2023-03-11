@@ -26,6 +26,7 @@ pub struct CanvasGrid {
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
     grid_text: TextLayout<String>,
+    grid_preview: TextLayout<String>,
     mouse_position: (usize, usize),
     selection_range: SelectionRange,
     is_mouse_down: bool,
@@ -43,6 +44,9 @@ impl CanvasGrid {
         let mut grid_text = TextLayout::<String>::new();
         grid_text.set_font(font.clone());
         grid_text.set_text("+".to_string());
+        let mut grid_preview = TextLayout::<String>::new();
+        grid_preview.set_font(font.clone());
+        grid_preview.set_text("+".to_string());
         CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
@@ -55,6 +59,7 @@ impl CanvasGrid {
             selection_range: SelectionRange::new(),
             letterbox,
             grid_text,
+            grid_preview,
         }
     }
 
@@ -274,6 +279,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             self.init_grid();
         }
         self.grid_text.rebuild_if_needed(ctx.text(), env);
+        self.grid_preview.rebuild_if_needed(ctx.text(), env);
         Size {
             width: self.width,
             height: self.height,
@@ -353,16 +359,19 @@ impl Widget<ApplicationState> for CanvasGrid {
                             ctx.stroke(h_rect, &highlight_brush, 1.0);
                         }
 
-                        let cell_content = self.grid_list.get(i).read();
+                        let (cell_content, cell_preview) = self.grid_list.get(i).read();
                         if !cell_content.is_ascii_whitespace() {
                             self.grid_text.set_text(cell_content.to_string());
-                            if self.grid_list.get(i).preview.is_some() {
-                                self.grid_text.set_text_color(Color::RED);
-                            } else {
-                                self.grid_text.set_text_color(Color::BLACK);
-                            }
+                            self.grid_text.set_text_color(Color::BLACK);
                             self.grid_text.rebuild_if_needed(ctx.text(), env);
                             self.grid_text
+                                .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
+                        }
+                        if !cell_preview.is_ascii_whitespace() {
+                            self.grid_preview.set_text(cell_preview.to_string());
+                            self.grid_preview.set_text_color(Color::RED);
+                            self.grid_preview.rebuild_if_needed(ctx.text(), env);
+                            self.grid_preview
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }
                     }

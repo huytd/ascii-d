@@ -1,4 +1,7 @@
-use crate::consts::{CHAR_NEWLINE, CHAR_SPACE};
+use crate::{
+    consts::{CHAR_NEWLINE, CHAR_SPACE},
+    shapes::line::LineDirection,
+};
 
 #[derive(Clone, Copy)]
 pub struct GridCell {
@@ -26,11 +29,10 @@ impl GridCell {
         GridCell::new(CHAR_NEWLINE)
     }
 
-    pub fn read(&self) -> char {
-        if let Some(content) = self.preview {
-            return content;
-        }
-        self.content
+    pub fn read(&self) -> (char, char) {
+        let content = self.content;
+        let preview = self.preview.unwrap_or(' ');
+        (content, preview)
     }
 
     pub fn read_content(&self) -> char {
@@ -53,6 +55,13 @@ impl GridCell {
 
     pub fn commit(&mut self) {
         if let Some(preview) = self.preview {
+            println!(
+                "PRE_COMMIT CONTENT = {} - COMMIT CONTENT = {}",
+                self.content, preview
+            );
+            // TODO: Implement line overlap processing here
+            // Each cell should carry an information about the starting point and the drawing
+            // direction, so the overlap algorithm could use
             self.content = preview;
             self.preview = None;
         }
