@@ -1,6 +1,5 @@
-use crate::{
-    consts::CHAR_SPACE,
-};
+use crate::consts::CHAR_SPACE;
+use crate::data::overlap;
 use crate::shapes::line::LineDirection;
 
 #[derive(Clone, Copy)]
@@ -9,7 +8,7 @@ pub struct GridCell {
     pub content: char,
     pub preview: Option<char>,
     pub highlighted: bool,
-    pub line_direction: Option<LineDirection>
+    pub line_direction: Option<LineDirection>,
 }
 
 impl GridCell {
@@ -19,7 +18,7 @@ impl GridCell {
             content,
             preview: None,
             highlighted: false,
-            line_direction: None
+            line_direction: None,
         }
     }
 
@@ -64,7 +63,8 @@ impl GridCell {
             // TODO: Implement line overlap processing here
             // Each cell should carry an information about the starting point and the drawing
             // direction, so the overlap algorithm could use
-            self.content = preview;
+            self.content =
+                overlap::calculate_cell_content(self.line_direction, self.content, preview);
             self.preview = None;
             self.line_direction = None;
         }
