@@ -9,9 +9,12 @@ use crate::{
 
 use super::ShapeRender;
 
+#[derive(Clone, Copy)]
 pub enum LineDirection {
-    Horizontal,
-    Vertical,
+    RightToLeft,
+    LeftToRight,
+    UpToDown,
+    DownToUp
 }
 
 pub struct LineShape {
@@ -32,46 +35,40 @@ impl ShapeRender for LineShape {
         grid_buffer.discard_all();
 
         let start_i = from_row * cols + from_col;
+        grid_buffer.get(start_i).set_line_direction(self.direction);
 
         match self.direction {
-            LineDirection::Vertical => {
-                let from = if from_row > to_row { to_row } else { from_row };
-                let to = if from_row > to_row { from_row } else { to_row };
-
-                for row in from..=to {
+            LineDirection::UpToDown => {
+                for row in from_row..=to_row {
                     let i = row * cols + from_col;
                     grid_buffer.get(i).set_preview(CHAR_VER_L);
                 }
-
-                if from_row > to_row {
-                    let head_i = from * cols + from_col;
-                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_DOWN);
-                } else {
-                    let head_i = to * cols + from_col;
-                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_UP);
+                let head_i = to_row * cols + from_col;
+                grid_buffer.get(head_i).set_preview(CHAR_ARROW_UP);
+            },
+            LineDirection::DownToUp => {
+                for row in to_row..=from_row {
+                    let i = row * cols + from_col;
+                    grid_buffer.get(i).set_preview(CHAR_VER_L);
                 }
-
-                // Mark start of the line
-                grid_buffer.get(start_i).set_preview('-');
-            }
-            LineDirection::Horizontal => {
-                let from = if from_col > to_col { to_col } else { from_col };
-                let to = if from_col > to_col { from_col } else { to_col };
-                for col in from..=to {
+                let head_i = to_row * cols + from_col;
+                grid_buffer.get(head_i).set_preview(CHAR_ARROW_DOWN);
+            },
+            LineDirection::RightToLeft => {
+                for col in from_col..=to_col {
                     let i = from_row * cols + col;
                     grid_buffer.get(i).set_preview(CHAR_HOR_L);
                 }
-
-                if from_col > to_col {
-                    let head_i = from_row * cols + from;
-                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_LEFT);
-                } else {
-                    let head_i = from_row * cols + to;
-                    grid_buffer.get(head_i).set_preview(CHAR_ARROW_RIGHT);
+                let head_i = from_row * cols + to_col;
+                grid_buffer.get(head_i).set_preview(CHAR_ARROW_RIGHT);
+            },
+            LineDirection::LeftToRight => {
+                for col in to_col..=from_col {
+                    let i = from_row * cols + col;
+                    grid_buffer.get(i).set_preview(CHAR_HOR_L);
                 }
-
-                // Mark start of the line
-                grid_buffer.get(start_i).set_preview('.');
+                let head_i = from_row * cols + to_col;
+                grid_buffer.get(head_i).set_preview(CHAR_ARROW_LEFT);
             }
         }
     }
@@ -95,7 +92,7 @@ impl LineShape {
         Self {
             start: (row, col),
             end: (row, col),
-            direction: LineDirection::Horizontal,
+            direction: LineDirection::RightToLeft,
             preview: true,
         }
     }

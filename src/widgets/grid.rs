@@ -16,7 +16,7 @@ use crate::{
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
-pub const FONT: &[u8] = include_bytes!("../../assets/iosevka-mono-regular.ttf");
+// pub const FONT: &[u8] = include_bytes!("../../assets/iosevka-mono-regular.ttf");
 
 pub struct CanvasGrid {
     width: f64,
@@ -34,8 +34,8 @@ pub struct CanvasGrid {
 }
 impl CanvasGrid {
     pub fn new(ctx: &mut LifeCycleCtx) -> Self {
-        let monospace_font = ctx.text().load_font(FONT).unwrap_or(FontFamily::MONOSPACE);
-        let font = FontDescriptor::new(monospace_font.clone())
+        // let monospace_font = ctx.text().load_font(FONT).unwrap_or(FontFamily::MONOSPACE);
+        let font = FontDescriptor::new(FontFamily::MONOSPACE)
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();
@@ -185,7 +185,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
                     self.selection_range.set_end(*point);
                 }
-                if let Some(point) = cmd.get(SELECTION_END_COMMAND) {
+                if let Some(_point) = cmd.get(SELECTION_END_COMMAND) {
                     if let Some(rect) = self.selection_range.as_rect() {
                         self.grid_list.highlight_rect(rect);
                     } else {
@@ -197,7 +197,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(file_info) = cmd.get(commands::SAVE_FILE_AS) {
                     println!("Save File {:?}", file_info.path());
                     if let Ok(mut file) = File::create(file_info.path()) {
-                        _ = file.write_all(self.grid_list.to_string().as_bytes());
+                        let _ = file.write_all(self.grid_list.to_string().as_bytes());
                         if let Some(file_name) =
                             file_info.path().to_str().and_then(|s| Some(s.to_string()))
                         {
