@@ -16,8 +16,6 @@ use crate::{
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
-// pub const FONT: &[u8] = include_bytes!("../../assets/iosevka-mono-regular.ttf");
-
 pub struct CanvasGrid {
     width: f64,
     height: f64,
@@ -33,8 +31,7 @@ pub struct CanvasGrid {
     tool_manager: ToolManager,
 }
 impl CanvasGrid {
-    pub fn new(ctx: &mut LifeCycleCtx) -> Self {
-        // let monospace_font = ctx.text().load_font(FONT).unwrap_or(FontFamily::MONOSPACE);
+    pub fn new(_ctx: &mut LifeCycleCtx) -> Self {
         let font = FontDescriptor::new(FontFamily::MONOSPACE)
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
