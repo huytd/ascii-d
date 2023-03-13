@@ -7,6 +7,8 @@ pub mod grid_list;
 pub mod selection;
 pub mod shape_list;
 
+mod overlap;
+
 #[derive(Clone, PartialEq, Data)]
 pub struct ApplicationState {
     pub mode: DrawingTools,

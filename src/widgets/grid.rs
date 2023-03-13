@@ -16,8 +16,6 @@ use crate::{
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
-pub const FONT: &[u8] = include_bytes!("../../assets/iosevka-mono-regular.ttf");
-
 pub struct CanvasGrid {
     width: f64,
     height: f64,
@@ -26,15 +24,15 @@ pub struct CanvasGrid {
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
     grid_text: TextLayout<String>,
+    grid_preview: TextLayout<String>,
     mouse_position: (usize, usize),
     selection_range: SelectionRange,
     is_mouse_down: bool,
     tool_manager: ToolManager,
 }
 impl CanvasGrid {
-    pub fn new(ctx: &mut LifeCycleCtx) -> Self {
-        let monospace_font = ctx.text().load_font(FONT).unwrap_or(FontFamily::MONOSPACE);
-        let font = FontDescriptor::new(monospace_font.clone())
+    pub fn new(_ctx: &mut LifeCycleCtx) -> Self {
+        let font = FontDescriptor::new(FontFamily::MONOSPACE)
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();
@@ -43,6 +41,9 @@ impl CanvasGrid {
         let mut grid_text = TextLayout::<String>::new();
         grid_text.set_font(font.clone());
         grid_text.set_text("+".to_string());
+        let mut grid_preview = TextLayout::<String>::new();
+        grid_preview.set_font(font.clone());
+        grid_preview.set_text("+".to_string());
         CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
@@ -55,6 +56,7 @@ impl CanvasGrid {
             selection_range: SelectionRange::new(),
             letterbox,
             grid_text,
+            grid_preview,
         }
     }
 
@@ -180,7 +182,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
                     self.selection_range.set_end(*point);
                 }
-                if let Some(point) = cmd.get(SELECTION_END_COMMAND) {
+                if let Some(_point) = cmd.get(SELECTION_END_COMMAND) {
                     if let Some(rect) = self.selection_range.as_rect() {
                         self.grid_list.highlight_rect(rect);
                     } else {
@@ -192,7 +194,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(file_info) = cmd.get(commands::SAVE_FILE_AS) {
                     println!("Save File {:?}", file_info.path());
                     if let Ok(mut file) = File::create(file_info.path()) {
-                        _ = file.write_all(self.grid_list.to_string().as_bytes());
+                        let _ = file.write_all(self.grid_list.to_string().as_bytes());
                         if let Some(file_name) =
                             file_info.path().to_str().and_then(|s| Some(s.to_string()))
                         {
@@ -274,6 +276,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             self.init_grid();
         }
         self.grid_text.rebuild_if_needed(ctx.text(), env);
+        self.grid_preview.rebuild_if_needed(ctx.text(), env);
         Size {
             width: self.width,
             height: self.height,
@@ -286,7 +289,7 @@ impl Widget<ApplicationState> for CanvasGrid {
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
+            let grid_brush = ctx.solid_brush(Color::rgb(0.96, 0.96, 0.96));
             let cursor_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91).with_alpha(0.5));
             let highlight_brush = ctx.solid_brush(Color::RED);
             let primary_color = env.get(theme::PRIMARY_LIGHT);
@@ -353,16 +356,19 @@ impl Widget<ApplicationState> for CanvasGrid {
                             ctx.stroke(h_rect, &highlight_brush, 1.0);
                         }
 
-                        let cell_content = self.grid_list.get(i).read();
+                        let (cell_content, cell_preview) = self.grid_list.get(i).read();
                         if !cell_content.is_ascii_whitespace() {
                             self.grid_text.set_text(cell_content.to_string());
-                            if self.grid_list.get(i).preview.is_some() {
-                                self.grid_text.set_text_color(Color::RED);
-                            } else {
-                                self.grid_text.set_text_color(Color::BLACK);
-                            }
+                            self.grid_text.set_text_color(Color::BLACK);
                             self.grid_text.rebuild_if_needed(ctx.text(), env);
                             self.grid_text
+                                .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
+                        }
+                        if !cell_preview.is_ascii_whitespace() {
+                            self.grid_preview.set_text(cell_preview.to_string());
+                            self.grid_preview.set_text_color(Color::RED);
+                            self.grid_preview.rebuild_if_needed(ctx.text(), env);
+                            self.grid_preview
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }
                     }

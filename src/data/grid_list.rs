@@ -73,7 +73,7 @@ impl GridList {
                 }
             }
             last_i = Some(cell.highlight_index);
-            line.push(cell.read());
+            line.push(cell.read().0);
         }
         if !line.is_empty() {
             result.push(line);
