@@ -9,12 +9,12 @@ use crate::{
 
 use super::ShapeRender;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum LineDirection {
     RightToLeft,
     LeftToRight,
     UpToDown,
-    DownToUp
+    DownToUp,
 }
 
 pub struct LineShape {
@@ -44,25 +44,25 @@ impl ShapeRender for LineShape {
                     grid_buffer.get(i).set_preview(CHAR_VER_L);
                 }
                 let head_i = to_row * cols + from_col;
-                grid_buffer.get(head_i).set_preview(CHAR_ARROW_UP);
-            },
+                grid_buffer.get(head_i).set_preview(CHAR_ARROW_DOWN);
+            }
             LineDirection::DownToUp => {
                 for row in to_row..=from_row {
                     let i = row * cols + from_col;
                     grid_buffer.get(i).set_preview(CHAR_VER_L);
                 }
                 let head_i = to_row * cols + from_col;
-                grid_buffer.get(head_i).set_preview(CHAR_ARROW_DOWN);
-            },
-            LineDirection::RightToLeft => {
+                grid_buffer.get(head_i).set_preview(CHAR_ARROW_UP);
+            }
+            LineDirection::LeftToRight => {
                 for col in from_col..=to_col {
                     let i = from_row * cols + col;
                     grid_buffer.get(i).set_preview(CHAR_HOR_L);
                 }
                 let head_i = from_row * cols + to_col;
                 grid_buffer.get(head_i).set_preview(CHAR_ARROW_RIGHT);
-            },
-            LineDirection::LeftToRight => {
+            }
+            LineDirection::RightToLeft => {
                 for col in to_col..=from_col {
                     let i = from_row * cols + col;
                     grid_buffer.get(i).set_preview(CHAR_HOR_L);

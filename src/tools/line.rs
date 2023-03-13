@@ -58,9 +58,9 @@ impl ToolControl for LineTool {
                     // Draw horizontal line
                     line.end = (from_row, mouse_col);
                     line.direction = if d_col > 0 {
-                        LineDirection::RightToLeft
-                    } else {
                         LineDirection::LeftToRight
+                    } else {
+                        LineDirection::RightToLeft
                     };
                 }
             }

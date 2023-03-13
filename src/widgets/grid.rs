@@ -292,7 +292,7 @@ impl Widget<ApplicationState> for CanvasGrid {
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
+            let grid_brush = ctx.solid_brush(Color::rgb(0.96, 0.96, 0.96));
             let cursor_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91).with_alpha(0.5));
             let highlight_brush = ctx.solid_brush(Color::RED);
             let primary_color = env.get(theme::PRIMARY_LIGHT);

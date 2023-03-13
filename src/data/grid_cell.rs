@@ -56,10 +56,6 @@ impl GridCell {
 
     pub fn commit(&mut self) {
         if let Some(preview) = self.preview {
-            println!(
-                "PRE_COMMIT CONTENT = {} - COMMIT CONTENT = {}",
-                self.content, preview
-            );
             // TODO: Implement line overlap processing here
             // Each cell should carry an information about the starting point and the drawing
             // direction, so the overlap algorithm could use
