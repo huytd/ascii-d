@@ -2,7 +2,7 @@ use consts::SELECTION_END_COMMAND;
 use druid::{
     commands::NEW_FILE,
     widget::{Scroll, SizedBox},
-    AppDelegate, AppLauncher, Application, Code, Command, DelegateCtx, Env, Event, Handled,
+    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Handled,
     LifeCycle, PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
 
@@ -95,9 +95,9 @@ impl AppDelegate<ApplicationState> for Delegate {
     fn window_removed(
         &mut self,
         id: WindowId,
-        data: &mut ApplicationState,
-        env: &Env,
-        ctx: &mut DelegateCtx,
+        _data: &mut ApplicationState,
+        _env: &Env,
+        _ctx: &mut DelegateCtx,
     ) {
         if let Some(pos) = self.windows.iter().position(|x| *x == id) {
             self.windows.remove(pos);
@@ -111,10 +111,10 @@ impl AppDelegate<ApplicationState> for Delegate {
     fn window_added(
         &mut self,
         id: WindowId,
-        handle: druid::WindowHandle,
-        data: &mut ApplicationState,
-        env: &Env,
-        ctx: &mut DelegateCtx,
+        _handle: druid::WindowHandle,
+        _data: &mut ApplicationState,
+        _env: &Env,
+        _ctx: &mut DelegateCtx,
     ) {
         self.windows.push(id);
     }
@@ -122,10 +122,10 @@ impl AppDelegate<ApplicationState> for Delegate {
     fn command(
         &mut self,
         ctx: &mut DelegateCtx,
-        target: Target,
+        _target: Target,
         cmd: &Command,
-        data: &mut ApplicationState,
-        env: &Env,
+        _data: &mut ApplicationState,
+        _env: &Env,
     ) -> Handled {
         if cmd.is(NEW_FILE) {
             let new_win = WindowDesc::new(MainWindow::new()).title("ASCII-d");

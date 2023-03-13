@@ -3,7 +3,6 @@ use std::{fs::File, io::Write, usize};
 use druid::{
     commands::{self, NEW_FILE},
     kurbo::Line,
-    piet::Text,
     theme, Application, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
     LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
 };
@@ -227,7 +226,7 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn lifecycle(
         &mut self,
-        ctx: &mut druid::LifeCycleCtx,
+        _ctx: &mut druid::LifeCycleCtx,
         event: &druid::LifeCycle,
         _data: &ApplicationState,
         _env: &druid::Env,
