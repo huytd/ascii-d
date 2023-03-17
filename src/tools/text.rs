@@ -117,9 +117,11 @@ impl ToolControl for TextTool {
             }
             KbKey::ArrowRight => {
                 self.cursor_step_forward(rows, cols);
+                self.last_edit_position = None;
             }
             KbKey::ArrowLeft => {
                 self.cursor_step_backward(cols);
+                self.last_edit_position = None;
             }
             KbKey::Enter => {
                 if let Some(pos) = self.last_edit_position {
