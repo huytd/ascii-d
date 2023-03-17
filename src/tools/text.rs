@@ -17,11 +17,19 @@ impl TextTool {
         }
     }
 
-    fn cursor_step(&mut self, rows: usize, cols: usize) {
+    fn cursor_step_forward(&mut self, rows: usize, cols: usize) {
         match self.cursor_position {
             (r, c) if r >= rows - 1 && c >= cols - 1 => {}
             (_, c) if c >= cols - 1 => self.cursor_position = (self.cursor_position.0 + 1, 0),
             _ => self.cursor_position.1 += 1,
+        }
+    }
+
+    fn cursor_step_backward(&mut self, cols: usize) {
+        match self.cursor_position {
+            (0, 0) => {}
+            (_, 0) => self.cursor_position = (self.cursor_position.0 - 1, cols - 1),
+            _ => self.cursor_position.1 -= 1,
         }
     }
 }
@@ -80,8 +88,7 @@ impl ToolControl for TextTool {
                 let (row, col) = self.cursor_position;
                 let i = row * cols + col;
                 grid_list.get(i).set_content(c);
-                // self.cursor_position.1 += 1;
-                self.cursor_step(rows, cols);
+                self.cursor_step_forward(rows, cols);
             }
             KbKey::Backspace => {
                 match self.cursor_position {
@@ -109,13 +116,11 @@ impl ToolControl for TextTool {
                 }
             }
             KbKey::ArrowRight => {
-                self.cursor_step(rows, cols);
+                self.cursor_step_forward(rows, cols);
             }
-            KbKey::ArrowLeft => match self.cursor_position {
-                (0, 0) => {}
-                (_, 0) => self.cursor_position = (self.cursor_position.0 - 1, cols - 1),
-                _ => self.cursor_position.1 -= 1,
-            },
+            KbKey::ArrowLeft => {
+                self.cursor_step_backward(cols);
+            }
             KbKey::Enter => {
                 if let Some(pos) = self.last_edit_position {
                     if pos.0 < rows - 1 {
