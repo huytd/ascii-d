@@ -2,8 +2,8 @@ use consts::SELECTION_END_COMMAND;
 use druid::{
     commands::NEW_FILE,
     widget::{Scroll, SizedBox},
-    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Handled,
-    LifeCycle, PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
+    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Handled, LifeCycle,
+    PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
 
 #[macro_use]

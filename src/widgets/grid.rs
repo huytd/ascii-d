@@ -3,8 +3,8 @@ use std::{fs::File, io::Write, usize};
 use druid::{
     commands::{self, NEW_FILE},
     kurbo::Line,
-    theme, Application, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
-    LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
+    Application, Code, Cursor, Event, FontDescriptor, FontFamily, FontWeight, LifeCycleCtx, Point,
+    Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
@@ -15,6 +15,8 @@ use crate::{
     },
     tools::{DrawingTools, ToolControl, ToolManager},
 };
+
+use super::CURRENT_THEME;
 
 pub struct CanvasGrid {
     width: f64,
@@ -111,6 +113,11 @@ impl Widget<ApplicationState> for CanvasGrid {
 
                             if event.mods.meta() || event.mods.ctrl() {
                                 match keycode {
+                                    Code::KeyD => unsafe {
+                                        if event.mods.shift() {
+                                            CURRENT_THEME.toggle_theme();
+                                        }
+                                    },
                                     Code::KeyC => {
                                         // copy current diagram to clipboard
                                         Application::global()
@@ -293,16 +300,16 @@ impl Widget<ApplicationState> for CanvasGrid {
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
+        let current_theme = unsafe { CURRENT_THEME.current() };
         let bound = ctx.region().bounding_box();
-        let brush = ctx.solid_brush(Color::WHITE);
+        let brush = ctx.solid_brush(current_theme.bg);
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let grid_brush = ctx.solid_brush(Color::rgb(0.96, 0.96, 0.96));
-            let cursor_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91).with_alpha(0.5));
-            let highlight_brush = ctx.solid_brush(Color::RED);
-            let primary_color = env.get(theme::PRIMARY_LIGHT);
-            let selection_brush = ctx.solid_brush(primary_color.with_alpha(0.5));
+            let grid_brush = ctx.solid_brush(current_theme.grid);
+            let cursor_brush = ctx.solid_brush(current_theme.cursor);
+            let highlight_brush = ctx.solid_brush(current_theme.highlight);
+            let selection_brush = ctx.solid_brush(current_theme.selection);
             let (m_row, m_col) = self.mouse_position;
 
             if let Some((cell_width, cell_height)) = self.cell_size {
@@ -368,14 +375,14 @@ impl Widget<ApplicationState> for CanvasGrid {
                         let (cell_content, cell_preview) = self.grid_list.get(i).read();
                         if !cell_content.is_ascii_whitespace() {
                             self.grid_text.set_text(cell_content.to_string());
-                            self.grid_text.set_text_color(Color::BLACK);
+                            self.grid_text.set_text_color(current_theme.fg);
                             self.grid_text.rebuild_if_needed(ctx.text(), env);
                             self.grid_text
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }
                         if !cell_preview.is_ascii_whitespace() {
                             self.grid_preview.set_text(cell_preview.to_string());
-                            self.grid_preview.set_text_color(Color::RED);
+                            self.grid_preview.set_text_color(current_theme.preview);
                             self.grid_preview.rebuild_if_needed(ctx.text(), env);
                             self.grid_preview
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
