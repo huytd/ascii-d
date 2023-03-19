@@ -16,6 +16,22 @@ impl TextTool {
             last_edit_position: None,
         }
     }
+
+    fn cursor_step_forward(&mut self, rows: usize, cols: usize) {
+        match self.cursor_position {
+            (r, c) if r >= rows - 1 && c >= cols - 1 => {}
+            (_, c) if c >= cols - 1 => self.cursor_position = (self.cursor_position.0 + 1, 0),
+            _ => self.cursor_position.1 += 1,
+        }
+    }
+
+    fn cursor_step_backward(&mut self, cols: usize) {
+        match self.cursor_position {
+            (0, 0) => {}
+            (_, 0) => self.cursor_position = (self.cursor_position.0 - 1, cols - 1),
+            _ => self.cursor_position.1 -= 1,
+        }
+    }
 }
 
 impl ToolControl for TextTool {
@@ -61,7 +77,7 @@ impl ToolControl for TextTool {
         _shape_list: &mut ShapeList,
         grid_list: &mut GridList,
     ) {
-        let (_, cols) = grid_list.grid_size;
+        let (rows, cols) = grid_list.grid_size;
 
         match event.clone().key {
             KbKey::Character(c) => {
@@ -72,34 +88,47 @@ impl ToolControl for TextTool {
                 let (row, col) = self.cursor_position;
                 let i = row * cols + col;
                 grid_list.get(i).set_content(c);
-                self.cursor_position.1 += 1;
+                self.cursor_step_forward(rows, cols);
             }
             KbKey::Backspace => {
-                self.cursor_position.1 -= 1;
+                match self.cursor_position {
+                    (0, 0) => {}
+                    (_, 0) => {
+                        self.cursor_position.0 -= 1;
+                        self.cursor_position.1 = cols - 1;
+                    }
+                    _ => self.cursor_position.1 -= 1,
+                }
                 let (row, col) = self.cursor_position;
                 let i = row * cols + col;
                 grid_list.get(i).set_content(' ');
             }
             KbKey::ArrowDown => {
-                self.cursor_position.0 += 1;
-                self.last_edit_position = None;
+                if self.cursor_position.0 < rows - 1 {
+                    self.cursor_position.0 += 1;
+                    self.last_edit_position = None;
+                }
             }
             KbKey::ArrowUp => {
-                self.cursor_position.0 -= 1;
-                self.last_edit_position = None;
+                if self.cursor_position.0 > 0 {
+                    self.cursor_position.0 -= 1;
+                    self.last_edit_position = None;
+                }
             }
             KbKey::ArrowRight => {
-                self.cursor_position.1 += 1;
+                self.cursor_step_forward(rows, cols);
                 self.last_edit_position = None;
             }
             KbKey::ArrowLeft => {
-                self.cursor_position.1 -= 1;
+                self.cursor_step_backward(cols);
                 self.last_edit_position = None;
             }
             KbKey::Enter => {
                 if let Some(pos) = self.last_edit_position {
-                    self.cursor_position = (pos.0 + 1, pos.1);
-                    self.last_edit_position = Some(self.cursor_position);
+                    if pos.0 < rows - 1 {
+                        self.cursor_position = (pos.0 + 1, pos.1);
+                        self.last_edit_position = Some(self.cursor_position);
+                    }
                 }
             }
             _ => {}
