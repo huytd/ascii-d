@@ -113,3 +113,63 @@ See the following diagram for the logic flow between the `ToolManager` and the
                           │                            │                            │
                           ▼                            ▼                            ▼
 ```
+
+# Undo and Redo
+
+When cell content changed, we call it an `Edit`. An `Edit` contains 3 fields,
+the `index` of a cell that changed, the original content and the new content.
+Normally, when the user perform an action, like drawing a shape, we will have 
+multiple edits, and it called a `Version`.
+
+``` 
+Edit                     Version                                        
+┌───┐     ┌───┐          ┌──────┬──────┬──────┬──────┬──────┬──────┬───┐
+│ A │────▶│ B │          │ Edit │ Edit │ Edit │ Edit │ Edit │ Edit │...│
+└───┘     └───┘          └──────┴──────┴──────┴──────┴──────┴──────┴───┘
+  at <index>                                                            
+```
+
+When editing, the user can perform Undo or Redo by saving/restoring the edit
+state based on the list of `Version`. We call this list a `History`, it also 
+have an `index` pointer to tell what's the current history position.
+
+```
+History                                                                 
+┌─────────┬─────────┬─────────┬─────────┬─────────┬───┐                 
+│ Version │ Version │ Version │ Version │ Version │...│                 
+└─────────┴─────────┴────🭯────┴─────────┴─────────┴───┘                 
+                         │index                                         
+```
+
+In its normal state, the `History` object will have an `index` pointing to the
+last `Version` element. When the user perform **Undo** action, we decrease the 
+`index` pointer, and restore the editor state to the `History[index]` version. When
+the user perform **Redo**, we increase the `index`, and apply the `History[index]` version
+to the editor's state.
+
+Keeping track of the undo history is pretty straightforward, for every action,
+we build the `Version` object, which contains all of the `Edit`, and push it to 
+the end of the `History` array.
+
+```
+Save a new Version to the end of History list                           
+┌────┬────┬────┬────┐   ┌────┐                                          
+│ V1 │ V2 │ V3 │ V4 │◀──┤ V5 │                                          
+└────┴────┴────┴─🭯──┘   └────┘                                          
+                 │index                                                 
+```
+
+One special case is when the user performed a few **undo** and the `index` is now
+at the middle of the `History` array. Any new edit come after that will replace the 
+`History` array at the point of `index`:
+
+``` 
+Save a new Version to the middle of History list                        
+                      ┌────┐                                            
+               ┌──────│ V5 │                                            
+               │      └────┘                                            
+┌────┬────┬────🭭────┐             ┌────┬────┬────┬────┐                 
+│ V1 │ V2 │ V3 │ V4 │     ==>     │ V1 │ V2 │ V3 │ V5 │                 
+└────┴────┴─🭯──┴────┘             └────┴────┴────┴─🭯──┘                 
+            │index                                 │index               
+```

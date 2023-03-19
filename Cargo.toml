@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 druid = { git = "https://github.com/linebender/druid", version = "0.8.2", features = ["image", "png"] }
+once_cell = "1.17.1"
 
 [package.metadata.bundle]
 copyright = "Copyright (c) Huy Tran 2023. All rights reserved."
