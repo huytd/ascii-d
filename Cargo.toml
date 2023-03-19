@@ -7,6 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dark-light = "1.0.0"
 druid = { git = "https://github.com/linebender/druid", version = "0.8.2", features = ["image", "png"] }
 once_cell = "1.17.1"
 

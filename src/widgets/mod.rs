@@ -18,6 +18,7 @@ pub struct ColorScheme {
 
 pub struct ThemeManager {
     colorscheme: ColorScheme,
+    is_light: bool,
 }
 
 impl ThemeManager {
@@ -46,21 +47,31 @@ impl ThemeManager {
     }
 
     pub fn new() -> Self {
-        Self {
-            colorscheme: ThemeManager::light(),
-        }
+        let mode = dark_light::detect();
+        return match mode {
+            dark_light::Mode::Dark => Self {
+                colorscheme: ThemeManager::dark(),
+                is_light: false,
+            },
+            dark_light::Mode::Light | dark_light::Mode::Default => Self {
+                colorscheme: ThemeManager::light(),
+                is_light: true,
+            },
+        };
     }
 
     pub fn current(&self) -> &ColorScheme {
         &self.colorscheme
     }
 
-    pub fn select_theme(&mut self, light: bool) {
-        self.colorscheme = if light {
-            ThemeManager::light()
+    pub fn toggle_theme(&mut self) {
+        if self.is_light {
+            self.is_light = false;
+            self.colorscheme = ThemeManager::dark();
         } else {
-            ThemeManager::dark()
-        };
+            self.is_light = true;
+            self.colorscheme = ThemeManager::light();
+        }
     }
 }
 

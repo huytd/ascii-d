@@ -113,6 +113,11 @@ impl Widget<ApplicationState> for CanvasGrid {
 
                             if event.mods.meta() || event.mods.ctrl() {
                                 match keycode {
+                                    Code::KeyD => unsafe {
+                                        if event.mods.shift() {
+                                            CURRENT_THEME.toggle_theme();
+                                        }
+                                    },
                                     Code::KeyC => {
                                         // copy current diagram to clipboard
                                         Application::global()
