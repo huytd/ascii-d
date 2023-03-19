@@ -10,7 +10,8 @@ use druid::{
 use crate::{
     consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
     data::{
-        grid_list::GridList, selection::SelectionRange, shape_list::ShapeList, ApplicationState,
+        grid_list::GridList, history::HISTORY_MANAGER, selection::SelectionRange,
+        shape_list::ShapeList, ApplicationState,
     },
     tools::{DrawingTools, ToolControl, ToolManager},
 };
@@ -136,6 +137,15 @@ impl Widget<ApplicationState> for CanvasGrid {
                                     Code::KeyN => {
                                         ctx.submit_command(NEW_FILE);
                                     }
+                                    Code::KeyZ => unsafe {
+                                        if event.mods.shift() {
+                                            // Redo
+                                            HISTORY_MANAGER.redo(&mut self.grid_list);
+                                        } else {
+                                            // Undo
+                                            HISTORY_MANAGER.undo(&mut self.grid_list);
+                                        }
+                                    },
                                     _ => {}
                                 }
                             }

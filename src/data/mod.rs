@@ -4,6 +4,7 @@ use crate::tools::DrawingTools;
 
 pub mod grid_cell;
 pub mod grid_list;
+pub mod history;
 pub mod selection;
 pub mod shape_list;
 

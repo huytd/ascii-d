@@ -1,14 +1,22 @@
 use druid::EventCtx;
 
-use crate::data::{grid_list::GridList, shape_list::ShapeList};
+use crate::data::{
+    grid_list::GridList,
+    history::{Version, HISTORY_MANAGER},
+    shape_list::ShapeList,
+};
 
 use super::ToolControl;
 
-pub struct EraserTool;
+pub struct EraserTool {
+    version: Version,
+}
 
 impl EraserTool {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            version: Version::new(),
+        }
     }
 }
 
@@ -34,7 +42,9 @@ impl ToolControl for EraserTool {
         let col = (event.pos.x / cell_width) as usize;
         let (_rows, cols) = grid_list.grid_size;
         let i = row * cols + col;
-        grid_list.get(i).clear();
+        let cell = grid_list.get(i);
+        self.version.push(i, cell.content, ' ');
+        cell.clear();
     }
 
     fn input(
@@ -53,5 +63,8 @@ impl ToolControl for EraserTool {
         _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
+        unsafe {
+            HISTORY_MANAGER.save_version(self.version.clone());
+        }
     }
 }

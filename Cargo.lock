@@ -25,6 +25,7 @@ name = "ascii-d"
 version = "0.2.0"
 dependencies = [
  "druid",
+ "once_cell",
 ]
 
 [[package]]

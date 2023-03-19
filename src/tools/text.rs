@@ -1,12 +1,17 @@
 use druid::{EventCtx, KbKey};
 
-use crate::data::{grid_list::GridList, shape_list::ShapeList};
+use crate::data::{
+    grid_list::GridList,
+    history::{Version, HISTORY_MANAGER},
+    shape_list::ShapeList,
+};
 
 use super::ToolControl;
 
 pub struct TextTool {
     cursor_position: (usize, usize),
     last_edit_position: Option<(usize, usize)>,
+    version: Version,
 }
 
 impl TextTool {
@@ -14,6 +19,7 @@ impl TextTool {
         Self {
             cursor_position: (0, 0),
             last_edit_position: None,
+            version: Version::new(),
         }
     }
 
@@ -61,15 +67,6 @@ impl ToolControl for TextTool {
     ) {
     }
 
-    fn end(
-        &mut self,
-        _ctx: &mut EventCtx,
-        _event: &druid::MouseEvent,
-        _shape_list: &mut ShapeList,
-        _grid_list: &mut GridList,
-    ) {
-    }
-
     fn input(
         &mut self,
         _ctx: &mut EventCtx,
@@ -87,8 +84,12 @@ impl ToolControl for TextTool {
                 let c = c.chars().next().unwrap();
                 let (row, col) = self.cursor_position;
                 let i = row * cols + col;
-                grid_list.get(i).set_content(c);
+                let cell = grid_list.get(i);
+                let from_content = cell.content;
+                let to_content = c;
+                cell.set_content(c);
                 self.cursor_step_forward(rows, cols);
+                self.version.push(i, from_content, to_content);
             }
             KbKey::Backspace => {
                 match self.cursor_position {
@@ -101,7 +102,11 @@ impl ToolControl for TextTool {
                 }
                 let (row, col) = self.cursor_position;
                 let i = row * cols + col;
-                grid_list.get(i).set_content(' ');
+                let cell = grid_list.get(i);
+                let from_content = cell.content;
+                let to_content = ' ';
+                cell.set_content(' ');
+                self.version.push(i, from_content, to_content);
             }
             KbKey::ArrowDown => {
                 if self.cursor_position.0 < rows - 1 {
@@ -137,5 +142,19 @@ impl ToolControl for TextTool {
         let (row, col) = self.cursor_position;
         let i = row * cols + col;
         grid_list.highlight(i);
+
+        unsafe {
+            HISTORY_MANAGER.save_version(self.version.clone());
+            self.version = Version::new();
+        }
+    }
+
+    fn end(
+        &mut self,
+        _ctx: &mut EventCtx,
+        _event: &druid::MouseEvent,
+        _shape_list: &mut ShapeList,
+        _grid_list: &mut GridList,
+    ) {
     }
 }
