@@ -12,8 +12,8 @@ pub const CHAR_VER_RIGHT_L: char = '├';
 pub const CHAR_VER_LEFT_L: char = '┤';
 pub const CHAR_CROSS: char = '┼';
 
-pub const CHAR_ARROW_UP: char = '🭯';
-pub const CHAR_ARROW_DOWN: char = '🭭';
+pub const CHAR_ARROW_UP: char = '▲';
+pub const CHAR_ARROW_DOWN: char = '▼';
 pub const CHAR_ARROW_RIGHT: char = '▶';
 pub const CHAR_ARROW_LEFT: char = '◀';
 
