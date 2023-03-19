@@ -2,8 +2,8 @@ use consts::SELECTION_END_COMMAND;
 use druid::{
     commands::NEW_FILE,
     widget::{Scroll, SizedBox},
-    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Handled,
-    LifeCycle, PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
+    AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Handled, LifeCycle,
+    PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
 
 #[macro_use]
@@ -15,7 +15,7 @@ mod tools;
 mod widgets;
 
 use data::ApplicationState;
-use widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget};
+use widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget, CURRENT_THEME};
 
 struct MainWindow {
     content: WidgetPod<ApplicationState, Box<dyn Widget<ApplicationState>>>,
@@ -137,6 +137,10 @@ impl AppDelegate<ApplicationState> for Delegate {
 }
 
 fn main() -> Result<(), PlatformError> {
+    // unsafe {
+    //     CURRENT_THEME.select_theme(false);
+    // }
+
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
     let app = AppLauncher::with_window(
