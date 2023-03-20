@@ -39,6 +39,7 @@ impl Version {
 
 pub struct History {
     versions: Vec<Version>,
+    // redo_stack: Vec<Version>,
     index: usize,
 }
 
@@ -46,6 +47,7 @@ impl History {
     pub fn new() -> Self {
         Self {
             versions: vec![],
+            // redo_stack: vec![],
             index: 0,
         }
     }
@@ -62,6 +64,11 @@ impl History {
             }
             self.index = self.versions.len();
         }
+        // println!("{:?}\n", version);
+        // self.versions.push(version);
+        // if !self.redo_stack.is_empty() {
+        //     self.redo_stack.clear();
+        // }
     }
 
     pub fn undo(&mut self, grid_list: &mut GridList) {
@@ -72,6 +79,13 @@ impl History {
                 grid_list.set(edit.index, edit.from);
             }
         }
+        // if let Some(top) = self.versions.pop() {
+        //     println!("{:?}\n", top);
+        //     for edit in &top.edits {
+        //         grid_list.set(edit.index, edit.from);
+        //     }
+        //     self.redo_stack.push(top);
+        // }
     }
 
     pub fn redo(&mut self, grid_list: &mut GridList) {
@@ -82,6 +96,13 @@ impl History {
             }
             self.index += 1;
         }
+        // if let Some(top) = self.redo_stack.pop() {
+        //     println!("{:?}\n", top);
+        //     for edit in &top.edits {
+        //         grid_list.set(edit.index, edit.to);
+        //     }
+        //     self.versions.push(top);
+        // }
     }
 }
 
