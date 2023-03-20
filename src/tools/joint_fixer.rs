@@ -17,6 +17,7 @@ use super::ToolControl;
 
 pub struct JointFixerTool {
     version: Version,
+    last_cursor_position: Option<usize>,
 }
 
 macro_rules! idx_to_opt_char {
@@ -84,6 +85,7 @@ impl JointFixerTool {
     pub fn new() -> Self {
         Self {
             version: Version::new(),
+            last_cursor_position: None,
         }
     }
 
@@ -177,6 +179,7 @@ impl ToolControl for JointFixerTool {
         _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
+        self.last_cursor_position = None;
     }
 
     fn draw(
@@ -191,6 +194,12 @@ impl ToolControl for JointFixerTool {
         let col = (event.pos.x / cell_width) as usize;
         let (rows, cols) = grid_list.grid_size;
         let i = row * cols + col;
+
+        if let Some(last_cursor_pos) = self.last_cursor_position {
+            if i == last_cursor_pos {
+                return;
+            }
+        }
 
         let up_i = match row {
             0 => None,
@@ -213,6 +222,7 @@ impl ToolControl for JointFixerTool {
         };
 
         if let Some(content) = self.calculate_content(grid_list, up_i, down_i, left_i, right_i) {
+            self.last_cursor_position = Some(i);
             let cell = grid_list.get(i);
             let from_content = cell.read_content();
             self.version.push(i, from_content, content);
@@ -229,6 +239,7 @@ impl ToolControl for JointFixerTool {
     ) {
         unsafe {
             HISTORY_MANAGER.save_version(self.version.clone());
+            self.version.clear();
         }
     }
 
