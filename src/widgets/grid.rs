@@ -108,6 +108,9 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 Code::Digit4 | Code::KeyE => {
                                     win_data.mode = DrawingTools::Eraser;
                                 }
+                                Code::Digit5 => {
+                                    data.mode = DrawingTools::JointFixer;
+                                }
                                 Code::Delete | Code::Backspace => {
                                     self.grid_list.erase_highlighted();
                                     self.grid_list.clear_all_highlight();
@@ -286,6 +289,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 DrawingTools::Rect => ctx.set_cursor(&Cursor::Crosshair),
                 DrawingTools::Text => ctx.set_cursor(&Cursor::IBeam),
                 DrawingTools::Eraser => ctx.set_cursor(&Cursor::Crosshair),
+                DrawingTools::JointFixer => ctx.set_cursor(&Cursor::Crosshair),
             }
         }
     }
