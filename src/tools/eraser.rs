@@ -33,6 +33,7 @@ impl ToolControl for EraserTool {
         _shape_list: &mut ShapeList,
         _grid_list: &mut GridList,
     ) {
+        self.last_cursor_position = None;
     }
 
     fn draw(
