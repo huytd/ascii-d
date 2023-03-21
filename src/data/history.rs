@@ -28,6 +28,10 @@ impl Version {
         self.edits.push(Edit::new(index, from, to));
     }
 
+    pub fn clear(&mut self) {
+        self.edits.clear();
+    }
+
     pub fn len(&self) -> usize {
         self.edits.len()
     }
@@ -81,4 +85,4 @@ impl History {
     }
 }
 
-pub static mut HISTORY_MANAGER: Lazy<History> = Lazy::new(|| History::new());
+pub static mut HISTORY_MANAGER: Lazy<History> = Lazy::new(History::new);
