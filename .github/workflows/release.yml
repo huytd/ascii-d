@@ -29,12 +29,13 @@ jobs:
           zip -r ASCII-d.zip "ASCII-d.app"
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
+          generateReleaseNotes: true
           draft: false
           prerelease: false
       - name: Upload release asset
@@ -44,6 +45,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./ASCII-d.zip
+          asset_path: target/release/bundle/osx/ASCII-d.zip
           asset_name: ASCII-d.zip
           asset_content_type: application/zip
