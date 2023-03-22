@@ -1,4 +1,7 @@
-use super::grid_cell::GridCell;
+use super::{
+    grid_cell::GridCell,
+    history::{Version, HISTORY_MANAGER},
+};
 use druid::Rect;
 use std::fmt::Display;
 
@@ -59,6 +62,10 @@ impl GridList {
         &mut self.data[index]
     }
 
+    pub fn set(&mut self, index: usize, content: char) {
+        self.data[index].content = content;
+    }
+
     pub fn get_highlighted_content(&mut self) -> String {
         let mut last_i: Option<usize> = None;
         let cells = self.data.iter_mut().filter(|cell| cell.highlighted);
@@ -73,7 +80,7 @@ impl GridList {
                 }
             }
             last_i = Some(cell.highlight_index);
-            line.push(cell.read());
+            line.push(cell.read().0);
         }
         if !line.is_empty() {
             result.push(line);
@@ -113,12 +120,18 @@ impl GridList {
     }
 
     pub fn erase_highlighted(&mut self) {
+        let mut version = Version::new();
         self.data
             .iter_mut()
-            .filter(|cell| cell.highlighted)
-            .for_each(|cell| {
+            .enumerate()
+            .filter(|(_, cell)| cell.highlighted)
+            .for_each(|(i, cell)| {
+                version.push(i, cell.content, ' ');
                 cell.clear();
             });
+        unsafe {
+            HISTORY_MANAGER.save_version(version);
+        }
     }
 
     pub fn clear_all_highlight(&mut self) {
@@ -130,10 +143,16 @@ impl GridList {
     }
 
     pub fn commit_all(&mut self) {
-        for cell in self.data.iter_mut() {
+        let mut version = Version::new();
+        for (i, cell) in self.data.iter_mut().enumerate() {
             if cell.preview.is_some() {
+                let from = cell.content;
                 cell.commit();
+                version.push(i, from, cell.content);
             }
+        }
+        unsafe {
+            HISTORY_MANAGER.save_version(version);
         }
     }
 
@@ -146,6 +165,7 @@ impl GridList {
     }
 
     pub fn load_content_at(&mut self, content: String, row: usize, col: usize) {
+        let mut version = Version::new();
         let (_, cols) = self.grid_size;
         let mut row = row;
         for line in content.lines() {
@@ -153,11 +173,15 @@ impl GridList {
             for c in line.chars() {
                 if !c.is_whitespace() {
                     let i = row * cols + col;
+                    version.push(i, self.data[i].content, c);
                     self.data[i].set_content(c);
                 }
                 col += 1;
             }
             row += 1;
+        }
+        unsafe {
+            HISTORY_MANAGER.save_version(version);
         }
     }
 

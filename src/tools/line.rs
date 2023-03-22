@@ -43,17 +43,25 @@ impl ToolControl for LineTool {
                 let mouse_row = (event.pos.y / cell_height) as usize;
                 let mouse_col = (event.pos.x / cell_width) as usize;
                 let (from_row, from_col) = line.start;
-                let d_row = (mouse_row as isize - from_row as isize).abs();
-                let d_col = (mouse_col as isize - from_col as isize).abs();
+                let d_row = mouse_row as isize - from_row as isize;
+                let d_col = mouse_col as isize - from_col as isize;
 
-                if d_row > d_col {
+                if d_row.abs() > d_col.abs() {
                     // Draw vertical line
                     line.end = (mouse_row, from_col);
-                    line.direction = LineDirection::Vertical;
+                    line.direction = if d_row > 0 {
+                        LineDirection::UpToDown
+                    } else {
+                        LineDirection::DownToUp
+                    };
                 } else {
                     // Draw horizontal line
                     line.end = (from_row, mouse_col);
-                    line.direction = LineDirection::Horizontal;
+                    line.direction = if d_col > 0 {
+                        LineDirection::LeftToRight
+                    } else {
+                        LineDirection::RightToLeft
+                    };
                 }
             }
         }

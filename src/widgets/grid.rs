@@ -3,20 +3,20 @@ use std::{fs::File, io::Write, usize};
 use druid::{
     commands::{self, NEW_FILE},
     kurbo::Line,
-    piet::Text,
-    theme, Application, Code, Color, Cursor, Event, FontDescriptor, FontFamily, FontWeight,
-    LifeCycleCtx, Point, Rect, RenderContext, Size, TextLayout, Widget,
+    Application, Code, Cursor, Event, FontDescriptor, FontFamily, FontWeight, LifeCycleCtx, Point,
+    Rect, RenderContext, Size, TextLayout, Widget,
 };
 
 use crate::{
     consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
     data::{
-        grid_list::GridList, selection::SelectionRange, shape_list::ShapeList, ApplicationState,
+        grid_list::GridList, history::HISTORY_MANAGER, selection::SelectionRange,
+        shape_list::ShapeList, ApplicationState,
     },
     tools::{DrawingTools, ToolControl, ToolManager},
 };
 
-pub const FONT: &[u8] = include_bytes!("../../assets/iosevka-mono-regular.ttf");
+use super::CURRENT_THEME;
 
 pub struct CanvasGrid {
     width: f64,
@@ -26,15 +26,15 @@ pub struct CanvasGrid {
     cell_size: Option<(f64, f64)>,
     letterbox: TextLayout<String>,
     grid_text: TextLayout<String>,
+    grid_preview: TextLayout<String>,
     mouse_position: (usize, usize),
     selection_range: SelectionRange,
     is_mouse_down: bool,
     tool_manager: ToolManager,
 }
 impl CanvasGrid {
-    pub fn new(ctx: &mut LifeCycleCtx) -> Self {
-        let monospace_font = ctx.text().load_font(FONT).unwrap_or(FontFamily::MONOSPACE);
-        let font = FontDescriptor::new(monospace_font.clone())
+    pub fn new(_ctx: &mut LifeCycleCtx) -> Self {
+        let font = FontDescriptor::new(FontFamily::MONOSPACE)
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();
@@ -43,6 +43,9 @@ impl CanvasGrid {
         let mut grid_text = TextLayout::<String>::new();
         // grid_text.set_font(font.clone());
         grid_text.set_text("+".to_string());
+        let mut grid_preview = TextLayout::<String>::new();
+        grid_preview.set_font(font.clone());
+        grid_preview.set_text("+".to_string());
         CanvasGrid {
             width: CANVAS_SIZE,
             height: CANVAS_SIZE,
@@ -55,6 +58,7 @@ impl CanvasGrid {
             selection_range: SelectionRange::new(),
             letterbox,
             grid_text,
+            grid_preview,
         }
     }
 
@@ -109,6 +113,11 @@ impl Widget<ApplicationState> for CanvasGrid {
 
                             if event.mods.meta() || event.mods.ctrl() {
                                 match keycode {
+                                    Code::KeyD => unsafe {
+                                        if event.mods.shift() {
+                                            CURRENT_THEME.toggle_theme();
+                                        }
+                                    },
                                     Code::KeyC => {
                                         // copy current diagram to clipboard
                                         // Application::global()
@@ -135,6 +144,15 @@ impl Widget<ApplicationState> for CanvasGrid {
                                     Code::KeyN => {
                                         ctx.submit_command(NEW_FILE);
                                     }
+                                    Code::KeyZ => unsafe {
+                                        if event.mods.shift() {
+                                            // Redo
+                                            HISTORY_MANAGER.redo(&mut self.grid_list);
+                                        } else {
+                                            // Undo
+                                            HISTORY_MANAGER.undo(&mut self.grid_list);
+                                        }
+                                    },
                                     _ => {}
                                 }
                             }
@@ -180,7 +198,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(point) = cmd.get(SELECTION_MOVE_COMMAND) {
                     self.selection_range.set_end(*point);
                 }
-                if let Some(point) = cmd.get(SELECTION_END_COMMAND) {
+                if let Some(_point) = cmd.get(SELECTION_END_COMMAND) {
                     if let Some(rect) = self.selection_range.as_rect() {
                         self.grid_list.highlight_rect(rect);
                     } else {
@@ -192,7 +210,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                 if let Some(file_info) = cmd.get(commands::SAVE_FILE_AS) {
                     println!("Save File {:?}", file_info.path());
                     if let Ok(mut file) = File::create(file_info.path()) {
-                        _ = file.write_all(self.grid_list.to_string().as_bytes());
+                        let _ = file.write_all(self.grid_list.to_string().as_bytes());
                         if let Some(file_name) =
                             file_info.path().to_str().and_then(|s| Some(s.to_string()))
                         {
@@ -225,7 +243,7 @@ impl Widget<ApplicationState> for CanvasGrid {
 
     fn lifecycle(
         &mut self,
-        ctx: &mut druid::LifeCycleCtx,
+        _ctx: &mut druid::LifeCycleCtx,
         event: &druid::LifeCycle,
         _data: &ApplicationState,
         _env: &druid::Env,
@@ -274,6 +292,7 @@ impl Widget<ApplicationState> for CanvasGrid {
             self.init_grid();
         }
         self.grid_text.rebuild_if_needed(ctx.text(), env);
+        self.grid_preview.rebuild_if_needed(ctx.text(), env);
         Size {
             width: self.width,
             height: self.height,
@@ -281,16 +300,16 @@ impl Widget<ApplicationState> for CanvasGrid {
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
+        let current_theme = unsafe { CURRENT_THEME.current() };
         let bound = ctx.region().bounding_box();
-        let brush = ctx.solid_brush(Color::WHITE);
+        let brush = ctx.solid_brush(current_theme.bg);
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
-            let grid_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91));
-            let cursor_brush = ctx.solid_brush(Color::rgb(0.91, 0.91, 0.91).with_alpha(0.5));
-            let highlight_brush = ctx.solid_brush(Color::RED);
-            let primary_color = env.get(theme::PRIMARY_LIGHT);
-            let selection_brush = ctx.solid_brush(primary_color.with_alpha(0.5));
+            let grid_brush = ctx.solid_brush(current_theme.grid);
+            let cursor_brush = ctx.solid_brush(current_theme.cursor);
+            let highlight_brush = ctx.solid_brush(current_theme.highlight);
+            let selection_brush = ctx.solid_brush(current_theme.selection);
             let (m_row, m_col) = self.mouse_position;
 
             if let Some((cell_width, cell_height)) = self.cell_size {
@@ -353,16 +372,19 @@ impl Widget<ApplicationState> for CanvasGrid {
                             ctx.stroke(h_rect, &highlight_brush, 1.0);
                         }
 
-                        let cell_content = self.grid_list.get(i).read();
+                        let (cell_content, cell_preview) = self.grid_list.get(i).read();
                         if !cell_content.is_ascii_whitespace() {
                             self.grid_text.set_text(cell_content.to_string());
-                            if self.grid_list.get(i).preview.is_some() {
-                                self.grid_text.set_text_color(Color::RED);
-                            } else {
-                                self.grid_text.set_text_color(Color::BLACK);
-                            }
+                            self.grid_text.set_text_color(current_theme.fg);
                             self.grid_text.rebuild_if_needed(ctx.text(), env);
                             self.grid_text
+                                .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
+                        }
+                        if !cell_preview.is_ascii_whitespace() {
+                            self.grid_preview.set_text(cell_preview.to_string());
+                            self.grid_preview.set_text_color(current_theme.preview);
+                            self.grid_preview.rebuild_if_needed(ctx.text(), env);
+                            self.grid_preview
                                 .draw(ctx, (col as f64 * cell_width, row as f64 * cell_height));
                         }
                     }

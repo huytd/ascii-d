@@ -10,18 +10,12 @@ pub const CHAR_HOR_UP_L: char = '┴';
 pub const CHAR_HOR_DOWN_L: char = '┬';
 pub const CHAR_VER_RIGHT_L: char = '├';
 pub const CHAR_VER_LEFT_L: char = '┤';
+pub const CHAR_CROSS: char = '┼';
 
-pub const CHAR_ARROW_DOWN: char = '▲';
-pub const CHAR_ARROW_UP: char = '▼';
+pub const CHAR_ARROW_UP: char = '▲';
+pub const CHAR_ARROW_DOWN: char = '▼';
 pub const CHAR_ARROW_RIGHT: char = '▶';
 pub const CHAR_ARROW_LEFT: char = '◀';
-
-pub fn is_arrowhead(c: char) -> bool {
-    c.eq(&CHAR_ARROW_LEFT)
-        || c.eq(&CHAR_ARROW_RIGHT)
-        || c.eq(&CHAR_ARROW_UP)
-        || c.eq(&CHAR_ARROW_DOWN)
-}
 
 pub const CHAR_SPACE: char = ' ';
 pub const CHAR_NEWLINE: char = '\n';
