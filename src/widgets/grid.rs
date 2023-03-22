@@ -34,14 +34,12 @@ pub struct CanvasGrid {
 }
 impl CanvasGrid {
     pub fn new(_ctx: &mut LifeCycleCtx) -> Self {
-        let font = FontDescriptor::new(FontFamily::MONOSPACE)
-            .with_weight(FontWeight::REGULAR)
-            .with_size(16.0);
+        let font = FontDescriptor::new(FontFamily::new_unchecked("monospace")).with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();
-        // letterbox.set_font(font.clone());
+        letterbox.set_font(font.clone());
         letterbox.set_text("H".to_string());
         let mut grid_text = TextLayout::<String>::new();
-        // grid_text.set_font(font.clone());
+        grid_text.set_font(font.clone());
         grid_text.set_text("+".to_string());
         let mut grid_preview = TextLayout::<String>::new();
         grid_preview.set_font(font.clone());
@@ -155,6 +153,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                                     },
                                     _ => {}
                                 }
+                                ctx.set_handled();
                             }
                         }
                     }
