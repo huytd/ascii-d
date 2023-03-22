@@ -3,3 +3,9 @@ patch: build
 
 build:
 	wasm-pack build --target web --dev
+
+release:
+	wasm-pack build --target web
+
+deploy: release patch
+	mkdir -p dist && cp ascii-d.js dist/ && cp index.html dist/ && cp -rf pkg dist/pkg && cp vercel.json dist/ && cd dist && vercel --prod

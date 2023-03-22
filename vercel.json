@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/js/info.js",
+            "destination": "https://analytics.huy.rocks/js/script.js"
+        },
+        {
+            "source": "/api/event",
+            "destination": "https://analytics.huy.rocks/api/event"
+        }
+    ]
+}
