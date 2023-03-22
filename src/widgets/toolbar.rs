@@ -3,8 +3,9 @@ use std::path::PathBuf;
 use super::image_button::ImageButton;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
-    widget::{CrossAxisAlignment, Flex, MainAxisAlignment}, Color, Event, FileDialogOptions, FileInfo, FileSpec, ImageBuf, Point, Rect,
-    RenderContext, Size, Widget, WidgetPod,
+    widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
+    Color, Event, FileDialogOptions, FileInfo, FileSpec, ImageBuf, Point, Rect, RenderContext,
+    Size, Widget, WidgetPod,
 };
 
 pub struct ToolBarWidget {
