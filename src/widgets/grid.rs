@@ -38,10 +38,10 @@ impl CanvasGrid {
             .with_weight(FontWeight::REGULAR)
             .with_size(16.0);
         let mut letterbox = TextLayout::<String>::new();
-        letterbox.set_font(font.clone());
+        // letterbox.set_font(font.clone());
         letterbox.set_text("H".to_string());
         let mut grid_text = TextLayout::<String>::new();
-        grid_text.set_font(font.clone());
+        // grid_text.set_font(font.clone());
         grid_text.set_text("+".to_string());
         CanvasGrid {
             width: CANVAS_SIZE,
@@ -111,26 +111,26 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 match keycode {
                                     Code::KeyC => {
                                         // copy current diagram to clipboard
-                                        Application::global()
-                                            .clipboard()
-                                            .put_string(self.grid_list.get_highlighted_content());
+                                        // Application::global()
+                                        //     .clipboard()
+                                        //     .put_string(self.grid_list.get_highlighted_content());
                                     }
                                     Code::KeyX => {
                                         // cut current diagram to clipboard
-                                        Application::global()
-                                            .clipboard()
-                                            .put_string(self.grid_list.get_highlighted_content());
+                                        // Application::global()
+                                        //     .clipboard()
+                                        //     .put_string(self.grid_list.get_highlighted_content());
                                         self.grid_list.erase_highlighted();
                                         self.grid_list.clear_all_highlight();
                                     }
                                     Code::KeyV => {
-                                        // paste clipboard content to mouse position
-                                        if let Some(content) =
-                                            Application::global().clipboard().get_string()
-                                        {
-                                            let (row, col) = self.mouse_position;
-                                            self.grid_list.load_content_at(content, row, col);
-                                        }
+                                        // // paste clipboard content to mouse position
+                                        // if let Some(content) =
+                                        //     Application::global().clipboard().get_string()
+                                        // {
+                                        //     let (row, col) = self.mouse_position;
+                                        //     self.grid_list.load_content_at(content, row, col);
+                                        // }
                                     }
                                     Code::KeyN => {
                                         ctx.submit_command(NEW_FILE);
