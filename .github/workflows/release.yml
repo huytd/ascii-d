@@ -1,0 +1,50 @@
+on:
+  push:
+    tags:
+      - 'v*'
+name: Release
+jobs:
+  release:
+    name: Build project
+    permissions: write-all
+    runs-on: macos-11 # add other OS later
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-bundle
+      - uses: actions-rs/cargo@v1
+        with:
+          command: bundle
+          args: --release
+      - name: Prepare release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd target/release/bundle/osx
+          zip -r ASCII-d.zip "ASCII-d.app"
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          generateReleaseNotes: true
+          draft: false
+          prerelease: false
+      - name: Upload release asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/release/bundle/osx/ASCII-d.zip
+          asset_name: ASCII-d.zip
+          asset_content_type: application/zip
