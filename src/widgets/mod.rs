@@ -29,7 +29,7 @@ impl ThemeManager {
             grid: Color::rgb(0.96, 0.96, 0.96),
             cursor: Color::rgb(0.91, 0.91, 0.91).with_alpha(0.5),
             preview: Color::RED,
-            highlight: Color::RED,
+            highlight: Color::rgb(0.08, 0.61, 0.99).with_alpha(0.35),
             selection: Color::rgb(0.08, 0.61, 0.99).with_alpha(0.5),
         }
     }
@@ -41,7 +41,7 @@ impl ThemeManager {
             grid: Color::rgb(0.20, 0.20, 0.20),
             cursor: Color::rgb(0.25, 0.25, 0.25).with_alpha(0.8),
             preview: Color::rgb(0.90, 0.33, 0.29).with_alpha(0.8),
-            highlight: Color::rgb(0.90, 0.33, 0.29).with_alpha(0.8),
+            highlight: Color::rgb(0.33, 0.61, 0.96).with_alpha(0.35),
             selection: Color::rgb(0.33, 0.61, 0.96).with_alpha(0.5),
         }
     }
