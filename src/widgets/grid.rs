@@ -317,10 +317,11 @@ impl Widget<ApplicationState> for CanvasGrid {
         }
     }
 
-    fn paint(&mut self, ctx: &mut druid::PaintCtx, _data: &ApplicationState, env: &druid::Env) {
+    fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &ApplicationState, env: &druid::Env) {
         let current_theme = unsafe { CURRENT_THEME.current() };
         let bound = ctx.region().bounding_box();
         let brush = ctx.solid_brush(current_theme.bg);
+        let preview_brush = ctx.solid_brush(current_theme.preview);
         ctx.with_save(|ctx| {
             ctx.clip(bound);
             ctx.fill(bound, &brush);
@@ -387,7 +388,11 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 h_row * cell_height + cell_height,
                             );
 
-                            ctx.stroke(h_rect, &highlight_brush, 1.0);
+                            if data.mode != DrawingTools::Text {
+                                ctx.fill(h_rect, &highlight_brush);
+                            } else {
+                                ctx.stroke(h_rect, &preview_brush, 1.0);
+                            }
                         }
 
                         let (cell_content, cell_preview) = self.grid_list.get(i).read();
