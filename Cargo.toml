@@ -15,10 +15,12 @@ druid = { git = "https://github.com/linebender/druid", version = "0.8.2", featur
 wasm-bindgen = "0.2.30"
 console_error_panic_hook = { version = "0.1.1", optional = true }
 once_cell = "1.17.1"
+wasm-bindgen-futures = "0.4.34"
+js-sys = "0.3.61"
 
 [dependencies.web-sys]
 version = "0.3"
-features = ["console"]
+features = ["console", "Window", "Navigator", "Clipboard"]
 
 [package.metadata.bundle]
 copyright = "Copyright (c) Huy Tran 2023. All rights reserved."

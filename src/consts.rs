@@ -27,3 +27,5 @@ pub const BUTTON_HIGHLIGHT_COMMAND: Selector<String> = Selector::new("button-hig
 pub const SELECTION_START_COMMAND: Selector<Point> = Selector::new("selection-start");
 pub const SELECTION_END_COMMAND: Selector<Point> = Selector::new("selection-end");
 pub const SELECTION_MOVE_COMMAND: Selector<Point> = Selector::new("selection-move");
+
+pub const CLIPBOARD_PASTE: Selector<String> = Selector::new("clipboard-paste");

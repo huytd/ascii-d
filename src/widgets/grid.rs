@@ -1,20 +1,34 @@
-use std::{fs::File, io::Write, usize};
+use std::{fs::File, io::Write, thread::spawn, usize};
 
 use druid::{
-    commands::{self, NEW_FILE},
+    commands::{self, NEW_FILE, PASTE},
     kurbo::Line,
     Application, Code, Cursor, Event, FontDescriptor, FontFamily, FontWeight, LifeCycleCtx, Point,
-    Rect, RenderContext, Size, TextLayout, Widget,
+    Rect, RenderContext, Size, Target, TextLayout, Widget,
 };
+use js_sys::JsString;
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
+use wasm_bindgen_futures::{spawn_local, JsFuture};
+use web_sys::window;
 
 use crate::{
-    consts::{CANVAS_SIZE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND, SELECTION_START_COMMAND},
+    consts::{
+        CANVAS_SIZE, CLIPBOARD_PASTE, SELECTION_END_COMMAND, SELECTION_MOVE_COMMAND,
+        SELECTION_START_COMMAND,
+    },
     data::{
         grid_list::GridList, history::HISTORY_MANAGER, selection::SelectionRange,
         shape_list::ShapeList, ApplicationState,
     },
     tools::{DrawingTools, ToolControl, ToolManager},
 };
+
+#[wasm_bindgen]
+extern "C" {
+    pub fn alert(msg: &str);
+    pub async fn readFromClipboard() -> JsValue;
+    pub fn writeToClipboard(content: &str);
+}
 
 use super::CURRENT_THEME;
 
@@ -118,26 +132,26 @@ impl Widget<ApplicationState> for CanvasGrid {
                                     },
                                     Code::KeyC => {
                                         // copy current diagram to clipboard
-                                        // Application::global()
-                                        //     .clipboard()
-                                        //     .put_string(self.grid_list.get_highlighted_content());
+                                        writeToClipboard(&self.grid_list.get_highlighted_content());
                                     }
                                     Code::KeyX => {
                                         // cut current diagram to clipboard
-                                        // Application::global()
-                                        //     .clipboard()
-                                        //     .put_string(self.grid_list.get_highlighted_content());
+                                        writeToClipboard(&self.grid_list.get_highlighted_content());
                                         self.grid_list.erase_highlighted();
                                         self.grid_list.clear_all_highlight();
                                     }
                                     Code::KeyV => {
                                         // // paste clipboard content to mouse position
-                                        // if let Some(content) =
-                                        //     Application::global().clipboard().get_string()
-                                        // {
-                                        //     let (row, col) = self.mouse_position;
-                                        //     self.grid_list.load_content_at(content, row, col);
-                                        // }
+                                        let sink = ctx.get_external_handle();
+                                        spawn_local(async move {
+                                            let val =
+                                                readFromClipboard().await.as_string().unwrap();
+                                            _ = sink.submit_command(
+                                                CLIPBOARD_PASTE,
+                                                val,
+                                                Target::Auto,
+                                            );
+                                        });
                                     }
                                     Code::KeyN => {
                                         ctx.submit_command(NEW_FILE);
@@ -191,6 +205,11 @@ impl Widget<ApplicationState> for CanvasGrid {
                 ctx.request_update();
             }
             Event::Command(cmd) => {
+                if let Some(content) = cmd.get(CLIPBOARD_PASTE) {
+                    let (row, col) = self.mouse_position;
+                    self.grid_list.load_content_at(content.to_owned(), row, col);
+                    ctx.request_update();
+                }
                 if let Some(point) = cmd.get(SELECTION_START_COMMAND) {
                     self.selection_range.set_start(*point);
                 }
