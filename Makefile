@@ -11,10 +11,10 @@ release:
 	wasm-pack build --target web
 
 copy:
-	mkdir -p dist && cp web-resources/* dist/ && cp ascii-d.js dist/ && cp index.html dist/ && cp -rf pkg dist/pkg && cp vercel.json dist/
+	mkdir -p dist && cp -rf assets dist/ && cp web-resources/* dist/ && cp ascii-d.js dist/ && cp index.html dist/ && cp -rf pkg dist/pkg && cp vercel.json dist/
 
 copy-dev:
-	mkdir -p dist-dev && cp web-resources/* dist-dev/ && cp ascii-d.js dist-dev/ && cp index.html dist-dev/ && cp -rf pkg dist-dev/pkg
+	mkdir -p dist-dev && cp -rf assets dist-dev/ && cp web-resources/* dist-dev/ && cp ascii-d.js dist-dev/ && cp index.html dist-dev/ && cp -rf pkg dist-dev/pkg
 
 deploy: release patch copy
 	cd dist && vercel --prod

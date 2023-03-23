@@ -6,6 +6,7 @@
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
         <link rel="manifest" href="/site.webmanifest">
+        <script src="https://cdn.tailwindcss.com"></script>
         <title>ASCII-d</title>
         <style>
             html, body, canvas {
@@ -15,16 +16,67 @@
                 height: 100%;
                 overflow: hidden;
             }
-
-			*, :before, :after {
-    			font-family: SF Mono, ui-monospace, monospace !important;
-			}
+        </style>
+        <style type="text/tailwindcss">
+            @layer utilities {
+                .tag {
+                    @apply rounded text-xs px-1 bg-neutral-700 border border-neutral-500 text-neutral-200;
+                }
+            }
         </style>
     </head>
     <body>
         <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+        <button id="openHelp" class="w-8 h-8 absolute bottom-[20px] right-[20px] border rounded-full shadow-lg bg-neutral-800 text-neutral-200">?</button>
+        <div id="helpBox" class="w-[400px] h-auto absolute bottom-[20px] right-[20px] border rounded-lg shadow-lg bg-neutral-800 text-neutral-200 font-sans">
+            <div class="p-4 relative">
+                <button class="absolute top-4 right-4" id="helpBoxClose">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <h1 class="font-bold text-xl mb-3">How to use</h1>
+                <p class="mb-2">Select a tool in the bottom left box, then click and drag your mouse for drawing.</p>
+                <ul class="mb-2 px-4">
+                    <li><img class="w-6 h-6 inline-block" src="./assets/select-icon.png"/> Select tool <kbd class="tag">ESC</kbd>: to select anything</li>
+                    <li><img class="w-6 h-6 inline-block" src="./assets/line-icon.png"/> Line tool <kbd class="tag">A</kbd>: to draw lines and arrows</li>
+                    <li><img class="w-6 h-6 inline-block" src="./assets/rect-icon.png"/> Rectangle tool <kbd class="tag">R</kbd>: to draw boxes</li>
+                    <li><img class="w-6 h-6 inline-block" src="./assets/text-icon.png"/> Text tool <kbd class="tag">T</kbd>: to insert text</li>
+                    <li><img class="w-6 h-6 inline-block" src="./assets/eraser-icon.png"/> Eraser <kbd class="tag">E</kbd>: to erase anything</li>
+                </ul>
+                <h1 class="font-bold text-xl my-3">Keyboard Shortcuts</h1>
+                <p class="mb-2">Other keyboard shortcuts starts with the <kbd class="tag">⌘</kbd> key on macOS, or <kbd>Ctrl</kbd> key on Linux and Windows.</p>
+                <ul class="mb-2 px-4">
+                    <li><kbd class="tag">⌘</kbd> <kbd class="tag">C</kbd>: Copy a selection (to Clipboard)</li>
+                    <li><kbd class="tag">⌘</kbd> <kbd class="tag">X</kbd>: Cut a selection (to Clipboard)</li>
+                    <li><kbd class="tag">⌘</kbd> <kbd class="tag">V</kbd>: Paste Clipboard at mouse position</li>
+                    <li><kbd class="tag">⌘</kbd> <kbd class="tag">Z</kbd>: Undo</li>
+                    <li><kbd class="tag">⌘</kbd> <kbd class="tag">Shift</kbd> <kbd class="tag">Z</kbd>: Redo</li>
+                    <li><kbd class="tag">Backspace</kbd>: Delete selected content</li>
+                </ul>
+            </div>
+        </div>
         <canvas id="canvas"></canvas>
         <script type="module" src="./ascii-d.js"></script>
     	<script defer data-domain="web.ascii-draw.com" src="/js/info.js"></script>
+        <script>
+            const helpBox = document.getElementById('helpBox');
+            const closeButton = document.getElementById('helpBoxClose');
+            const openHelp = document.getElementById('openHelp');
+
+            openHelp.addEventListener('click', () => {
+                helpBox.style.display = 'block';
+            });
+
+            closeButton.addEventListener('click', () => {
+                localStorage.setItem('ascii-help-viewed', 'yes');
+                helpBox.style.display = 'none';
+            });
+
+            const helpViewed = localStorage.getItem('ascii-help-viewed') ?? 'no';
+            if (helpViewed === 'yes') {
+                helpBox.style.display = 'none';
+            }
+        </script>
     </body>
 </html>
