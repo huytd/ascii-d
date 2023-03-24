@@ -9,6 +9,7 @@ pub struct GridList {
     data: Vec<GridCell>,
     pub cell_size: (f64, f64),
     pub grid_size: (usize, usize),
+    pub current_selection: Option<((usize, usize), (usize, usize))>,
 }
 
 impl Display for GridList {
@@ -42,6 +43,7 @@ impl GridList {
             data: vec![],
             cell_size: (0.0, 0.0),
             grid_size: (0, 0),
+            current_selection: None,
         }
     }
 
@@ -50,6 +52,7 @@ impl GridList {
             data: vec![GridCell::empty(); rows * cols],
             cell_size: (cell_width, cell_height),
             grid_size: (rows, cols),
+            current_selection: None,
         }
     }
 
@@ -117,6 +120,8 @@ impl GridList {
                 self.data[index].highlight(index);
             }
         }
+
+        self.current_selection = Some(((start_row, start_col), (end_row, end_col)));
     }
 
     pub fn erase_highlighted(&mut self) {
@@ -140,6 +145,7 @@ impl GridList {
                 cell.clear_highlight();
             }
         }
+        self.current_selection = None;
     }
 
     pub fn commit_all(&mut self) {
@@ -161,6 +167,22 @@ impl GridList {
             if cell.preview.is_some() {
                 cell.discard();
             }
+        }
+    }
+
+    pub fn put_preview_at(&mut self, content: &str, row: usize, col: usize) {
+        let (_, cols) = self.grid_size;
+        let mut row = row;
+        for line in content.lines() {
+            let mut col = col;
+            for c in line.chars() {
+                if !c.is_whitespace() {
+                    let i = row * cols + col;
+                    self.data[i].set_preview(c);
+                }
+                col += 1;
+            }
+            row += 1;
         }
     }
 
