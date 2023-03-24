@@ -78,6 +78,10 @@ impl Widget<ApplicationState> for CanvasGrid {
         data: &mut ApplicationState,
         _env: &druid::Env,
     ) {
+        let win_data = data
+            .windows
+            .get_mut(&ctx.window_id())
+            .expect("Invalid WindowID");
         match event {
             Event::WindowConnected => {
                 // Have to request focus in order to get keyboard event
@@ -86,23 +90,23 @@ impl Widget<ApplicationState> for CanvasGrid {
             Event::KeyDown(event) => {
                 match event.code {
                     Code::Escape => {
-                        data.mode = DrawingTools::Select;
+                        win_data.mode = DrawingTools::Select;
                     }
                     keycode => {
-                        if data.mode != DrawingTools::Text {
+                        if win_data.mode != DrawingTools::Text {
                             // Only handle shortcut key if not in text mode
                             match keycode {
                                 Code::Digit1 | Code::KeyL | Code::KeyA => {
-                                    data.mode = DrawingTools::Line;
+                                    win_data.mode = DrawingTools::Line;
                                 }
                                 Code::Digit2 | Code::KeyR => {
-                                    data.mode = DrawingTools::Rect;
+                                    win_data.mode = DrawingTools::Rect;
                                 }
                                 Code::Digit3 | Code::KeyT => {
-                                    data.mode = DrawingTools::Text;
+                                    win_data.mode = DrawingTools::Text;
                                 }
                                 Code::Digit4 | Code::KeyE => {
-                                    data.mode = DrawingTools::Eraser;
+                                    win_data.mode = DrawingTools::Eraser;
                                 }
                                 Code::Delete | Code::Backspace => {
                                     self.grid_list.erase_highlighted();
@@ -214,7 +218,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                         if let Some(file_name) =
                             file_info.path().to_str().and_then(|s| Some(s.to_string()))
                         {
-                            data.current_file = Some(file_name.clone());
+                            win_data.current_file = Some(file_name.clone());
                             ctx.window().set_title(file_name.as_str());
                         }
                     }
@@ -227,7 +231,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                             if let Some(file_name) =
                                 file_info.path().to_str().and_then(|s| Some(s.to_string()))
                             {
-                                data.current_file = Some(file_name.clone());
+                                win_data.current_file = Some(file_name.clone());
                                 ctx.window().set_title(file_name.as_str());
                             }
                         }
@@ -261,14 +265,22 @@ impl Widget<ApplicationState> for CanvasGrid {
         data: &ApplicationState,
         _env: &druid::Env,
     ) {
-        if old_data.mode != data.mode {
-            self.tool_manager.set_tool(data.mode);
-            if old_data.mode == DrawingTools::Text {
+        let win_data = data
+            .windows
+            .get(&ctx.window_id())
+            .expect("Invalid WindowID");
+        let old_win_data = old_data
+            .windows
+            .get(&ctx.window_id())
+            .expect("Invalid WindowID");
+        if old_win_data.mode != win_data.mode {
+            self.tool_manager.set_tool(win_data.mode);
+            if old_win_data.mode == DrawingTools::Text {
                 self.shape_list.commit_all(&mut self.grid_list);
                 self.grid_list.clear_all_highlight();
             }
 
-            match data.mode {
+            match win_data.mode {
                 DrawingTools::Select => ctx.set_cursor(&Cursor::Arrow),
                 DrawingTools::Line => ctx.set_cursor(&Cursor::Crosshair),
                 DrawingTools::Rect => ctx.set_cursor(&Cursor::Crosshair),
@@ -300,6 +312,10 @@ impl Widget<ApplicationState> for CanvasGrid {
     }
 
     fn paint(&mut self, ctx: &mut druid::PaintCtx, data: &ApplicationState, env: &druid::Env) {
+        let win_data = data
+            .windows
+            .get(&ctx.window_id())
+            .expect("Invalid WindowID");
         let current_theme = unsafe { CURRENT_THEME.current() };
         let bound = ctx.region().bounding_box();
         let brush = ctx.solid_brush(current_theme.bg);
@@ -370,7 +386,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                                 h_row * cell_height + cell_height,
                             );
 
-                            if data.mode != DrawingTools::Text {
+                            if win_data.mode != DrawingTools::Text {
                                 ctx.fill(h_rect, &highlight_brush);
                             } else {
                                 ctx.stroke(h_rect, &preview_brush, 1.0);

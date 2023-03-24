@@ -5,6 +5,7 @@ use druid::{
     AppDelegate, AppLauncher, Application, Command, DelegateCtx, Env, Handled, LifeCycle,
     PlatformError, Point, Target, Widget, WidgetPod, WindowDesc, WindowId,
 };
+use std::collections::HashMap;
 
 #[macro_use]
 mod macros;
@@ -14,6 +15,7 @@ mod shapes;
 mod tools;
 mod widgets;
 
+use crate::data::WindowData;
 use data::ApplicationState;
 use widgets::{grid::CanvasGrid, layout::StackLayout, toolbar::ToolBarWidget};
 
@@ -95,12 +97,13 @@ impl AppDelegate<ApplicationState> for Delegate {
     fn window_removed(
         &mut self,
         id: WindowId,
-        _data: &mut ApplicationState,
+        data: &mut ApplicationState,
         _env: &Env,
         _ctx: &mut DelegateCtx,
     ) {
         if let Some(pos) = self.windows.iter().position(|x| *x == id) {
             self.windows.remove(pos);
+            data.windows.remove(&id);
         }
         if self.windows.len() == 0 {
             // Quit when the window is closed
@@ -112,11 +115,12 @@ impl AppDelegate<ApplicationState> for Delegate {
         &mut self,
         id: WindowId,
         _handle: druid::WindowHandle,
-        _data: &mut ApplicationState,
+        data: &mut ApplicationState,
         _env: &Env,
         _ctx: &mut DelegateCtx,
     ) {
         self.windows.push(id);
+        data.windows.insert(id.to_owned(), WindowData::new());
     }
 
     fn command(
@@ -139,17 +143,18 @@ impl AppDelegate<ApplicationState> for Delegate {
 fn main() -> Result<(), PlatformError> {
     // https://github.com/linebender/druid/pull/1701/files
     // Follow the above PR for transparent title bar status
-    let app = AppLauncher::with_window(
-        WindowDesc::new(MainWindow::new())
-            .title("ASCII-d")
-            .window_size((640.0, 480.0)),
-    );
+    let window = WindowDesc::new(MainWindow::new())
+        .title("ASCII-d")
+        .window_size((640.0, 480.0));
+    let win_id = window.id.to_owned();
+    let app = AppLauncher::with_window(window);
+    let mut window_map = HashMap::new();
+    window_map.insert(win_id, WindowData::new());
     app.delegate(Delegate {
         windows: Vec::new(),
     })
     .launch(ApplicationState {
-        mode: tools::DrawingTools::Select,
-        current_file: None,
+        windows: window_map,
     })?;
     Ok(())
 }

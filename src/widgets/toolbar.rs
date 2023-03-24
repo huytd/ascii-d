@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use super::image_button::ImageButton;
+use crate::data::WindowData;
 use crate::{consts::BUTTON_HIGHLIGHT_COMMAND, data::ApplicationState, tools::DrawingTools};
 use druid::{
     widget::{CrossAxisAlignment, Flex, MainAxisAlignment},
@@ -34,8 +35,12 @@ impl ToolBarWidget {
                         DrawingTools::Select.to_string(),
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
                         let tool = DrawingTools::Select;
-                        data.mode = tool;
+                        win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
@@ -48,8 +53,12 @@ impl ToolBarWidget {
                         DrawingTools::Line.to_string(),
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
                         let tool = DrawingTools::Line;
-                        data.mode = tool;
+                        win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
@@ -62,8 +71,12 @@ impl ToolBarWidget {
                         DrawingTools::Rect.to_string(),
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
                         let tool = DrawingTools::Rect;
-                        data.mode = tool;
+                        win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
@@ -76,8 +89,12 @@ impl ToolBarWidget {
                         DrawingTools::Text.to_string(),
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
                         let tool = DrawingTools::Text;
-                        data.mode = tool;
+                        win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
@@ -90,8 +107,12 @@ impl ToolBarWidget {
                         DrawingTools::Eraser.to_string(),
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
                         let tool = DrawingTools::Eraser;
-                        data.mode = tool;
+                        win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
@@ -114,7 +135,11 @@ impl ToolBarWidget {
                 .with_child(
                     ImageButton::new(save_icon, Size::new(26.0, 26.0), String::new()).on_click(
                         move |ctx, data: &mut ApplicationState, _env| {
-                            save_to_file(data, ctx);
+                            let win_data = data
+                                .windows
+                                .get_mut(&ctx.window_id())
+                                .expect("Invalid WindowID");
+                            save_to_file(win_data, ctx);
                             ctx.set_handled();
                         },
                     ),
@@ -142,7 +167,7 @@ fn open_from_file(ctx: &mut druid::EventCtx) {
     ctx.submit_command(druid::commands::SHOW_OPEN_PANEL.with(open_dialog_options));
 }
 
-fn save_to_file(data: &mut ApplicationState, ctx: &mut druid::EventCtx) {
+fn save_to_file(data: &mut WindowData, ctx: &mut druid::EventCtx) {
     let save_dialog_options = FileDialogOptions::new()
         .allowed_types(vec![FileSpec::TEXT])
         .default_type(FileSpec::TEXT)
@@ -172,10 +197,14 @@ impl Widget<ApplicationState> for ToolBarWidget {
         self.left_buttons.event(ctx, event, data, env);
         self.right_buttons.event(ctx, event, data, env);
 
+        let win_data = data
+            .windows
+            .get_mut(&ctx.window_id())
+            .expect("Invalid WindowID");
         // Prevent the mouse event to be propagated to underlying widgets
         match event {
             Event::WindowConnected => {
-                ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
+                ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(win_data.mode.to_string()));
             }
             Event::Notification(notification) => {
                 if let Some(name) = notification.get(BUTTON_HIGHLIGHT_COMMAND) {
@@ -183,10 +212,10 @@ impl Widget<ApplicationState> for ToolBarWidget {
                 }
             }
             Event::KeyDown(event) => {
-                if data.mode != DrawingTools::Text && event.mods.meta() || event.mods.ctrl() {
+                if win_data.mode != DrawingTools::Text && event.mods.meta() || event.mods.ctrl() {
                     match event.code {
                         druid::Code::KeyS => {
-                            save_to_file(data, ctx);
+                            save_to_file(win_data, ctx);
                         }
                         druid::Code::KeyO => {
                             open_from_file(ctx);
@@ -218,8 +247,16 @@ impl Widget<ApplicationState> for ToolBarWidget {
         data: &ApplicationState,
         env: &druid::Env,
     ) {
-        if old_data.mode != data.mode {
-            ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(data.mode.to_string()));
+        let win_data = data
+            .windows
+            .get(&ctx.window_id())
+            .expect("Invalid WindowID");
+        let old_win_data = old_data
+            .windows
+            .get(&ctx.window_id())
+            .expect("Invalid WindowID");
+        if old_win_data.mode != win_data.mode {
+            ctx.submit_command(BUTTON_HIGHLIGHT_COMMAND.with(win_data.mode.to_string()));
         }
         self.left_buttons.update(ctx, data, env);
         self.right_buttons.update(ctx, data, env);
