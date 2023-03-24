@@ -18,7 +18,7 @@ pub mod rect;
 pub mod select;
 pub mod text;
 
-#[derive(Clone, Copy, PartialEq, Data)]
+#[derive(Clone, Copy, PartialEq, Data, Debug)]
 pub enum DrawingTools {
     Select = 0,
     Line = 1,
