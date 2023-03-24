@@ -4,6 +4,7 @@ use druid::Point;
 
 use crate::data::grid_list::GridList;
 
+pub mod block;
 pub mod line;
 pub mod rect;
 
