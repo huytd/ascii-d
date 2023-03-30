@@ -23,6 +23,8 @@ impl ToolBarWidget {
         let rect_icon = ImageBuf::from_data(include_bytes!("../../assets/rect-icon.png")).unwrap();
         let eraser_icon =
             ImageBuf::from_data(include_bytes!("../../assets/eraser-icon.png")).unwrap();
+        let joint_fixer_icon =
+            ImageBuf::from_data(include_bytes!("../../assets/joint-fixer-icon.png")).unwrap();
         let save_icon = ImageBuf::from_data(include_bytes!("../../assets/save-icon.png")).unwrap();
         let open_icon = ImageBuf::from_data(include_bytes!("../../assets/open-icon.png")).unwrap();
 
@@ -112,6 +114,24 @@ impl ToolBarWidget {
                             .get_mut(&ctx.window_id())
                             .expect("Invalid WindowID");
                         let tool = DrawingTools::Eraser;
+                        win_data.mode = tool;
+                        ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
+                        ctx.set_handled();
+                    }),
+                )
+                .with_spacer(4.0)
+                .with_child(
+                    ImageButton::new(
+                        joint_fixer_icon,
+                        Size::new(26.0, 26.0),
+                        DrawingTools::JointFixer.to_string(),
+                    )
+                    .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
+                        let tool = DrawingTools::JointFixer;
                         win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
