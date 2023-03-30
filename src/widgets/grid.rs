@@ -109,7 +109,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                                     win_data.mode = DrawingTools::Eraser;
                                 }
                                 Code::Digit5 => {
-                                    data.mode = DrawingTools::JointFixer;
+                                    win_data.mode = DrawingTools::JointFixer;
                                 }
                                 Code::Delete | Code::Backspace => {
                                     self.grid_list.erase_highlighted();

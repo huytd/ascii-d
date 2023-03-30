@@ -127,8 +127,12 @@ impl ToolBarWidget {
                         DrawingTools::JointFixer.to_string(),
                     )
                     .on_click(|ctx, data: &mut ApplicationState, _env| {
+                        let win_data = data
+                            .windows
+                            .get_mut(&ctx.window_id())
+                            .expect("Invalid WindowID");
                         let tool = DrawingTools::JointFixer;
-                        data.mode = tool;
+                        win_data.mode = tool;
                         ctx.submit_notification(BUTTON_HIGHLIGHT_COMMAND.with(tool.to_string()));
                         ctx.set_handled();
                     }),
