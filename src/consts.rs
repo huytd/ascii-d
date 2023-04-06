@@ -23,6 +23,7 @@ pub const CHAR_NEWLINE: char = '\n';
 pub const CANVAS_SIZE: f64 = 5000.0;
 
 pub const BUTTON_HIGHLIGHT_COMMAND: Selector<String> = Selector::new("button-highlight");
+//pub const BUTTON_HOVER_COMMAND: Selector<String> = Selector::new("button-hover");
 
 pub const SELECTION_START_COMMAND: Selector<Point> = Selector::new("selection-start");
 pub const SELECTION_END_COMMAND: Selector<Point> = Selector::new("selection-end");

@@ -6,7 +6,7 @@ use crate::data::{
     shape_list::ShapeList,
 };
 
-use super::ToolControl;
+use super::{ResizeOption, ToolControl};
 
 pub struct TextTool {
     cursor_position: (usize, usize),
@@ -41,24 +41,16 @@ impl TextTool {
 }
 
 impl ToolControl for TextTool {
-    fn start(
+    fn draw(
         &mut self,
         _ctx: &mut EventCtx,
-        event: &druid::MouseEvent,
+        _event: &druid::MouseEvent,
         _shape_list: &mut ShapeList,
-        grid_list: &mut GridList,
+        _grid_list: &mut GridList,
     ) {
-        let (cell_width, cell_height) = grid_list.cell_size;
-        let (_, cols) = grid_list.grid_size;
-        let row = (event.pos.y / cell_height) as usize;
-        let col = (event.pos.x / cell_width) as usize;
-        self.cursor_position = (row, col);
-        self.last_edit_position = Some(self.cursor_position);
-        let i = row * cols + col;
-        grid_list.highlight(i);
     }
 
-    fn draw(
+    fn end(
         &mut self,
         _ctx: &mut EventCtx,
         _event: &druid::MouseEvent,
@@ -149,12 +141,22 @@ impl ToolControl for TextTool {
         }
     }
 
-    fn end(
+    fn start(
         &mut self,
         _ctx: &mut EventCtx,
-        _event: &druid::MouseEvent,
+        event: &druid::MouseEvent,
         _shape_list: &mut ShapeList,
-        _grid_list: &mut GridList,
+        grid_list: &mut GridList,
     ) {
+        let (cell_width, cell_height) = grid_list.cell_size;
+        let (_, cols) = grid_list.grid_size;
+        let row = (event.pos.y / cell_height) as usize;
+        let col = (event.pos.x / cell_width) as usize;
+        self.cursor_position = (row, col);
+        self.last_edit_position = Some(self.cursor_position);
+        let i = row * cols + col;
+        grid_list.highlight(i);
     }
+
+    fn resize(&mut self, option: ResizeOption) {}
 }

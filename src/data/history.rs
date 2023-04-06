@@ -28,6 +28,13 @@ impl Version {
         self.edits.push(Edit::new(index, from, to));
     }
 
+    // will not overwrite the existed index
+    pub fn push_without_overwrite(&mut self, index: usize, from: char, to: char) {
+        if !self.edits.iter().any(|edit| edit.index == index) {
+            self.edits.push(Edit::new(index, from, to));
+        }
+    }
+
     pub fn clear(&mut self) {
         self.edits.clear();
     }

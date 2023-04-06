@@ -27,6 +27,19 @@ pub enum DrawingTools {
     Rect = 4,
 }
 
+#[derive(Clone, Copy, PartialEq, Data, Debug)]
+pub enum ToolsSize {
+    Default = 0,
+    Small = 1 << 0,
+    Medium = 1 << 1,
+    Large = 1 << 2,
+}
+
+pub enum ResizeOption {
+    Increase,
+    Decrease,
+}
+
 impl Display for DrawingTools {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let op = match self {
@@ -55,14 +68,14 @@ impl<T> IndexMut<DrawingTools> for Vec<T> {
 }
 
 pub trait ToolControl {
-    fn start(
+    fn draw(
         &mut self,
         ctx: &mut EventCtx,
         event: &MouseEvent,
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
     );
-    fn draw(
+    fn end(
         &mut self,
         ctx: &mut EventCtx,
         event: &MouseEvent,
@@ -76,13 +89,15 @@ pub trait ToolControl {
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
     );
-    fn end(
+    fn start(
         &mut self,
         ctx: &mut EventCtx,
         event: &MouseEvent,
         shape_list: &mut ShapeList,
         grid_list: &mut GridList,
     );
+
+    fn resize(&mut self, option: ResizeOption);
 }
 
 pub struct ToolManager {
@@ -106,6 +121,17 @@ impl ToolManager {
 
     pub fn set_tool(&mut self, tool: DrawingTools) {
         self.current = tool;
+    }
+
+    pub fn resize_tool(&mut self, option: ResizeOption) {
+        match option {
+            ResizeOption::Increase => {
+                self.available_tools[self.current].resize(ResizeOption::Increase);
+            }
+            ResizeOption::Decrease => {
+                self.available_tools[self.current].resize(ResizeOption::Decrease);
+            }
+        }
     }
 }
 
@@ -148,5 +174,9 @@ impl ToolControl for ToolManager {
         grid_list: &mut GridList,
     ) {
         self.available_tools[self.current].end(ctx, event, shape_list, grid_list);
+    }
+
+    fn resize(&mut self, option: ResizeOption) {
+        self.available_tools[self.current].resize(option);
     }
 }

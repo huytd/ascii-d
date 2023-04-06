@@ -5,7 +5,7 @@ use crate::{
     shapes::line::{LineDirection, LineShape},
 };
 
-use super::ToolControl;
+use super::{ResizeOption, ToolControl};
 
 pub struct LineTool;
 
@@ -84,4 +84,6 @@ impl ToolControl for LineTool {
         _grid_list: &mut GridList,
     ) {
     }
+
+    fn resize(&mut self, option: ResizeOption) {}
 }
