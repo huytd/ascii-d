@@ -1,3 +1,5 @@
+use crate::tools::DrawingTools;
+
 use super::{
     grid_cell::GridCell,
     history::{Version, HISTORY_MANAGER},
@@ -131,7 +133,7 @@ impl GridList {
             .enumerate()
             .filter(|(_, cell)| cell.highlighted)
             .for_each(|(i, cell)| {
-                version.push(i, cell.content, ' ');
+                version.push(i, cell.content, ' ', DrawingTools::Select);
                 cell.clear();
             });
         unsafe {
@@ -154,7 +156,7 @@ impl GridList {
             if cell.preview.is_some() {
                 let from = cell.content;
                 cell.commit();
-                version.push(i, from, cell.content);
+                version.push(i, from, cell.content, DrawingTools::Rect);
             }
         }
         unsafe {
@@ -195,7 +197,7 @@ impl GridList {
             for c in line.chars() {
                 if !c.is_whitespace() {
                     let i = row * cols + col;
-                    version.push(i, self.data[i].content, c);
+                    version.push(i, self.data[i].content, c, DrawingTools::Line);
                     self.data[i].set_content(c);
                 }
                 col += 1;

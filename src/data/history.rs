@@ -1,16 +1,36 @@
+use crate::tools::DrawingTools;
+
 use super::grid_list::GridList;
 use once_cell::sync::Lazy;
 
 #[derive(Debug, Clone)]
-struct Edit {
+pub struct Edit {
     index: usize,
     from: char,
     to: char,
+    tool: DrawingTools,
 }
 
 impl Edit {
-    pub fn new(index: usize, from: char, to: char) -> Self {
-        Self { index, from, to }
+    pub fn new(index: usize, from: char, to: char, tool: DrawingTools) -> Self {
+        Self {
+            index,
+            from,
+            to,
+            tool,
+        }
+    }
+
+    pub fn get_index(&self) -> usize {
+        self.index
+    }
+
+    pub fn get_to(&self) -> char {
+        self.to
+    }
+
+    pub fn get_tool(&self) -> DrawingTools {
+        self.tool
     }
 }
 
@@ -24,14 +44,20 @@ impl Version {
         Self { edits: vec![] }
     }
 
-    pub fn push(&mut self, index: usize, from: char, to: char) {
-        self.edits.push(Edit::new(index, from, to));
+    pub fn push(&mut self, index: usize, from: char, to: char, tool: DrawingTools) {
+        self.edits.push(Edit::new(index, from, to, tool));
     }
 
     // will not overwrite the existed index
-    pub fn push_without_overwrite(&mut self, index: usize, from: char, to: char) {
+    pub fn push_without_overwrite(
+        &mut self,
+        index: usize,
+        from: char,
+        to: char,
+        tool: DrawingTools,
+    ) {
         if !self.edits.iter().any(|edit| edit.index == index) {
-            self.edits.push(Edit::new(index, from, to));
+            self.edits.push(Edit::new(index, from, to, tool));
         }
     }
 
@@ -41,6 +67,10 @@ impl Version {
 
     pub fn len(&self) -> usize {
         self.edits.len()
+    }
+
+    pub fn get_edits(&self) -> &Vec<Edit> {
+        &self.edits
     }
 }
 
@@ -55,6 +85,10 @@ impl History {
             versions: vec![],
             index: 0,
         }
+    }
+
+    pub fn get_history(&self) -> &Vec<Version> {
+        &self.versions
     }
 
     pub fn save_version(&mut self, version: Version) {

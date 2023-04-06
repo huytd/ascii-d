@@ -13,7 +13,7 @@ use crate::{
         grid_list::GridList, history::HISTORY_MANAGER, selection::SelectionRange,
         shape_list::ShapeList, ApplicationState,
     },
-    tools::{eraser::EraserTool, DrawingTools, ResizeOption, ToolControl, ToolManager},
+    tools::{DrawingTools, ResizeOption, ToolControl, ToolManager},
 };
 
 use super::CURRENT_THEME;

@@ -6,7 +6,7 @@ use crate::data::{
     shape_list::ShapeList,
 };
 
-use super::{ResizeOption, ToolControl};
+use super::{DrawingTools, ResizeOption, ToolControl};
 
 pub struct TextTool {
     cursor_position: (usize, usize),
@@ -81,7 +81,8 @@ impl ToolControl for TextTool {
                 let to_content = c;
                 cell.set_content(c);
                 self.cursor_step_forward(rows, cols);
-                self.version.push(i, from_content, to_content);
+                self.version
+                    .push(i, from_content, to_content, DrawingTools::Text);
             }
             KbKey::Backspace => {
                 match self.cursor_position {
@@ -98,7 +99,8 @@ impl ToolControl for TextTool {
                 let from_content = cell.content;
                 let to_content = ' ';
                 cell.set_content(' ');
-                self.version.push(i, from_content, to_content);
+                self.version
+                    .push(i, from_content, to_content, DrawingTools::Text);
             }
             KbKey::ArrowDown => {
                 if self.cursor_position.0 < rows - 1 {
@@ -158,5 +160,5 @@ impl ToolControl for TextTool {
         grid_list.highlight(i);
     }
 
-    fn resize(&mut self, option: ResizeOption) {}
+    fn resize(&mut self, _option: ResizeOption) {}
 }

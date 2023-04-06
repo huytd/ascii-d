@@ -122,17 +122,6 @@ impl ToolManager {
     pub fn set_tool(&mut self, tool: DrawingTools) {
         self.current = tool;
     }
-
-    pub fn resize_tool(&mut self, option: ResizeOption) {
-        match option {
-            ResizeOption::Increase => {
-                self.available_tools[self.current].resize(ResizeOption::Increase);
-            }
-            ResizeOption::Decrease => {
-                self.available_tools[self.current].resize(ResizeOption::Decrease);
-            }
-        }
-    }
 }
 
 impl ToolControl for ToolManager {

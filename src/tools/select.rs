@@ -98,5 +98,5 @@ impl ToolControl for SelectTool {
         self.is_selecting = false;
     }
 
-    fn resize(&mut self, option: ResizeOption) {}
+    fn resize(&mut self, _option: ResizeOption) {}
 }

@@ -65,5 +65,5 @@ impl ToolControl for RectTool {
     ) {
     }
 
-    fn resize(&mut self, option: ResizeOption) {}
+    fn resize(&mut self, _option: ResizeOption) {}
 }

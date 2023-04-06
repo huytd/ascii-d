@@ -9,17 +9,23 @@ use crate::{
     },
 };
 
-use super::{ResizeOption, ToolControl, ToolsSize};
+use super::{DrawingTools, ResizeOption, ToolControl, ToolsSize};
 
 pub struct EraserTool {
     version: Version,
     last_cursor_position: Option<usize>,
     size: ToolsSize,
+    _method: EraserMethod,
 }
 
 pub enum EraserAction {
     Clear,
     CheckEmpty,
+}
+
+pub enum EraserMethod {
+    HistoryBased,
+    //ShapeBased,
 }
 
 impl EraserTool {
@@ -28,6 +34,7 @@ impl EraserTool {
             version: Version::new(),
             last_cursor_position: None,
             size: ToolsSize::Default,
+            _method: EraserMethod::HistoryBased,
         }
     }
 
@@ -73,14 +80,61 @@ impl EraserTool {
                 match action {
                     EraserAction::Clear => {
                         grid_list.get(pos).clear();
-                        self.version
-                            .push_without_overwrite(pos, from_content, CHAR_SPACE);
+                        self.version.push_without_overwrite(
+                            pos,
+                            from_content,
+                            CHAR_SPACE,
+                            DrawingTools::Eraser,
+                        );
                     }
                     EraserAction::CheckEmpty => {
                         if !from_content.eq(&CHAR_SPACE) {
                             return false;
                         }
                     }
+                }
+            }
+        }
+
+        true
+    }
+
+    pub fn shape_action(
+        self: &mut Self,
+        grid_list: &mut GridList,
+        pos: usize,
+        action: &EraserAction,
+    ) -> bool {
+        let from_content = grid_list.get(pos).read_content();
+
+        match action {
+            EraserAction::Clear => unsafe {
+                let history_index = HISTORY_MANAGER.get_history().iter().position(|version| {
+                    version.get_edits().iter().any(|edit| {
+                        edit.get_index() == pos && edit.get_tool() != DrawingTools::Select
+                    })
+                });
+
+                if let Some(history_index) = history_index {
+                    let version = HISTORY_MANAGER.get_history().get(history_index).unwrap();
+
+                    let mut new_version = Version::new();
+                    for edit in version.get_edits() {
+                        grid_list.set(edit.get_index(), CHAR_SPACE);
+                        new_version.push(
+                            edit.get_index(),
+                            edit.get_to(),
+                            CHAR_SPACE,
+                            DrawingTools::Eraser,
+                        );
+                    }
+
+                    HISTORY_MANAGER.save_version(new_version);
+                }
+            },
+            EraserAction::CheckEmpty => {
+                if !from_content.eq(&CHAR_SPACE) {
+                    return false;
                 }
             }
         }
@@ -112,6 +166,23 @@ impl ToolControl for EraserTool {
         let col = (event.pos.x / cell_width) as usize;
         let (_rows, cols) = grid_list.grid_size;
         let i = row * cols + col;
+
+        // if user is holding ctrl key --> erase shape
+        if event.mods.ctrl() {
+            if let Some(last_cursor_pos) = self.last_cursor_position {
+                if i == last_cursor_pos
+                    || self.shape_action(grid_list, i, &EraserAction::CheckEmpty)
+                {
+                    return;
+                }
+            }
+
+            self.last_cursor_position = Some(i);
+            self.shape_action(grid_list, i, &EraserAction::Clear);
+            return;
+        }
+
+        // if user is not holding ctrl key --> erase area
         if let Some(last_cursor_pos) = self.last_cursor_position {
             if i == last_cursor_pos || self.area_action(grid_list, i, &EraserAction::CheckEmpty) {
                 return;
