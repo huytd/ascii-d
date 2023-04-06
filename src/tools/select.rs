@@ -7,7 +7,7 @@ use crate::{
     data::{grid_list::GridList, shape_list::ShapeList},
 };
 
-use super::ToolControl;
+use super::{ResizeOption, ToolControl};
 
 pub struct SelectTool {
     is_selecting: bool,
@@ -97,4 +97,6 @@ impl ToolControl for SelectTool {
         ctx.submit_command(SELECTION_END_COMMAND.with(event.pos));
         self.is_selecting = false;
     }
+
+    fn resize(&mut self, _option: ResizeOption) {}
 }

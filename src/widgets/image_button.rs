@@ -33,6 +33,9 @@ impl<T: Data> ImageButton<T> {
     ) -> ControllerHost<Self, Click<T>> {
         ControllerHost::new(self, Click::new(f))
     }
+
+    // TODO: add on_hover
+    // pub fn on_hover () -> {}
 }
 
 impl<T: Data> Widget<T> for ImageButton<T> {

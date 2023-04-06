@@ -5,7 +5,7 @@ use crate::{
     shapes::rect::RectShape,
 };
 
-use super::ToolControl;
+use super::{ResizeOption, ToolControl};
 
 pub struct RectTool;
 
@@ -64,4 +64,6 @@ impl ToolControl for RectTool {
         _grid_list: &mut GridList,
     ) {
     }
+
+    fn resize(&mut self, _option: ResizeOption) {}
 }

@@ -13,7 +13,7 @@ use crate::{
         grid_list::GridList, history::HISTORY_MANAGER, selection::SelectionRange,
         shape_list::ShapeList, ApplicationState,
     },
-    tools::{DrawingTools, ToolControl, ToolManager},
+    tools::{DrawingTools, ResizeOption, ToolControl, ToolManager},
 };
 
 use super::CURRENT_THEME;
@@ -95,6 +95,7 @@ impl Widget<ApplicationState> for CanvasGrid {
                     keycode => {
                         if win_data.mode != DrawingTools::Text {
                             // Only handle shortcut key if not in text mode
+
                             match keycode {
                                 Code::Digit1 | Code::KeyL | Code::KeyA => {
                                     win_data.mode = DrawingTools::Line;
@@ -159,6 +160,19 @@ impl Widget<ApplicationState> for CanvasGrid {
                                     },
                                     _ => {}
                                 }
+                            }
+                        }
+
+                        // only apply for EraserTool at the moment
+                        if win_data.mode == DrawingTools::Eraser {
+                            match keycode {
+                                Code::Minus => {
+                                    self.tool_manager.resize(ResizeOption::Decrease);
+                                }
+                                Code::Equal => {
+                                    self.tool_manager.resize(ResizeOption::Increase);
+                                }
+                                _ => {}
                             }
                         }
                     }
